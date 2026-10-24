@@ -1,0 +1,397 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actF 05 风格。章节卡：05 角落（三块颜料点出来、画笔刷一笔）。
+           ① 三个用处：第一支 / 上一期 / 这一期三帧叠着，框住画面上真的签名和头像；彩色只给真实画面；定调子：第一支开头的口号大字 → 改成真实画面
+           ② 怎么来的：布景板上贴一张纸，写着作者那句话；个人 IP 背景（就是现在这块舞台）；光靠说说不清 → 参考
+           ③ Skillry 真实录屏（小窗口、不露网址）→ 怎么选：三张手绘小卡（讲清楚 / 真实界面标重点 / 做得出来）
+           ④ 第一个参考（原作 X @stokebuilder · Skillry 复刻）：原作和复刻并排的录屏 → 作者的两句话 → 只拿了底（和这期的舞台并排对上）→ 提示词逐行框出来，就像我们的 Skill
+           ⑤ 第二个参考（原作 X @Tardigrade111 · Skillry 复刻）：线稿一点点搭起来 → 作者的两句话 → 我们拿的（上一期一层层搭起来）→ 浅色底和橙色没拿 → 提示词只有一两句 → 直接指给 AI 看
+           ⑥ 小结清单 → ⑦ 对着画面说「不要」，一版版收窄到现在 → ⑧ 五块 → ⑨ 写进 Skill：品牌层规格真文件 + Skills 官方介绍；固定的每支一样，画面每支重新做。 */
+        #f-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #f-card, #f-setw, #f-in { position: absolute; inset: 0; }
+        #f-setw { transform-origin: 50% 50%; }
+        #f-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        #f-x { pointer-events: none; }
+        #f-x .hand { font-family: "ShuHei", sans-serif; font-weight: 700; fill: #161616; }
+        .f-pc { position: absolute; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.14), 0 30px 70px rgba(0,0,0,0.55); opacity: 0; }
+        .f-pc img { display: block; width: 100%; height: 100%; object-fit: cover; }
+        .f-pc .tag { position: absolute; left: 10px; bottom: 10px; padding: 5px 10px; border-radius: 7px; background: rgba(18,18,20,0.86); font: 600 17px/1 "PuHui", sans-serif; color: #e8e8ea; }
+        #f-sigbox { left: 46px; top: 38px; width: 279px; height: 90px; }
+        #f-avbox { left: 1784px; top: 32px; width: 88px; height: 88px; border-radius: 50%; }
+        .f-win { position: absolute; opacity: 0; }
+        .f-win .body video, .f-win .body img { object-fit: cover; }
+        .f-quote { position: absolute; padding: 18px 24px 20px; border-radius: 14px; background: #f2f2ef; box-shadow: 0 0 0 1.5px #161616, 0 24px 60px rgba(0,0,0,0.45); font: 700 30px/1.35 "ShuHei", sans-serif; color: #161616; white-space: nowrap; opacity: 0; }
+        .f-quote small { display: block; margin-bottom: 8px; font: 600 16px/1 "PuHui", sans-serif; color: #6a6a6a; }
+        .f-src { position: absolute; font: 600 18px/1 "PuHui", sans-serif; color: rgba(255,255,255,0.78); white-space: nowrap; opacity: 0; }
+        .f-strike { position: absolute; height: 3px; background: #f2f2f2; box-shadow: 0 0 0 1.5px rgba(10,10,12,0.8); transform-origin: 0 50%; opacity: 0; }
+        /* 现场的一块小舞台（品牌层的同一套背景，缩小摆着对比） */
+        .f-stage { position: absolute; overflow: hidden; border-radius: 10px; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.14), 0 30px 70px rgba(0,0,0,0.55); opacity: 0; }
+        .f-stage .in { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; }
+        .f-stage .ghosts { left: -60px; }
+        .f-crop { position: absolute; inset: 0; overflow: hidden; }
+        .f-crop > .src { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+        .f-chip { border-radius: 23px; }
+        #f-x .cred { font: 700 7px "PuHui", sans-serif; fill: #161616; } #f-x .cred.s2 { font-weight: 500; font-size: 5.5px; fill: #555; }
+        #f-x .qm { font: 700 21px "ShuHei", sans-serif; fill: #161616; }
+        .f-row { position: absolute; display: flex; align-items: center; gap: 24px; opacity: 0; }
+        .f-row .k { width: 190px; font: 700 34px/1 "ShuHei", sans-serif; color: #f4f4f6; white-space: nowrap; }
+        .f-row .v { font: 500 30px/1 "PuHui", sans-serif; color: #c9c9ce; white-space: nowrap; }
+        #f-bsw { position: absolute; left: 2110px; top: 3410px; width: 1100px; height: 440px; transform: scale(1.4); transform-origin: 0 0; }
+        #f-bs { position: absolute; left: 0; top: 0; width: 1100px; opacity: 0; }
+      </style>
+      <div id="f-root" data-composition-id="actF" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <svg width="0" height="0" style="position:absolute"><filter id="f-mbh" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur id="f-mbhg" stdDeviation="0 0" /></filter><filter id="f-mbv" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="f-mbvg" stdDeviation="0 0" /></filter></svg>
+        <div id="f-card"><div id="f-setw"><div class="mset" id="f-set"><!--@@INCLUDE:src/partials/set/set_actF.html@@-->
+          <!-- 布景板上贴一张纸：作者用自己的话定的方向（片场坐标） -->
+          <svg class="mset-svg" id="f-x" viewBox="0 0 1920 1080">
+            <g id="f-paper" transform="translate(1196 270) rotate(-3)"><g filter="url(#f-s-wob)"><rect x="-74" y="-46" width="148" height="92" rx="3" fill="#000" opacity="0.15" transform="translate(4 5)" /><rect x="-74" y="-46" width="148" height="92" rx="3" class="s w th" />
+              <rect x="-16" y="-52" width="32" height="12" fill="#e4e4e1" class="s th" /></g>
+              <text class="hand" x="0" y="-8" text-anchor="middle" font-size="17">黑白极简，</text><text class="hand" x="0" y="18" text-anchor="middle" font-size="13">带一点点剪纸的感觉</text></g>
+            <!-- 「有些感觉，光靠说是说不清的」：米花头上一个问号泡泡 →「这时候，我就会找参考」：布景板旁边钉上两张参考的截图（作者标在下面） -->
+            <g id="f-qm" transform="translate(1119 146)"><g filter="url(#f-s-wob)"><path class="s w th" d="M-22 -18 h40 q8 0 8 8 v16 q0 8 -8 8 h-14 l-6 9 l-5 -9 h-15 q-8 0 -8 -8 v-16 q0 -8 8 -8 z" /></g><text class="qm" x="-2" y="5" text-anchor="middle">?</text></g>
+            <g class="f-ref" id="f-rf1" transform="translate(1392 188) rotate(4)"><g filter="url(#f-s-wob)"><rect x="-50" y="-31" width="100" height="62" rx="2" class="s w th" /></g>
+              <image href="assets/img/ref_stoke.jpg" x="-46" y="-27" width="92" height="51.75" preserveAspectRatio="xMidYMid slice" />
+              <g filter="url(#f-s-wob)"><rect x="-13" y="-36" width="26" height="10" fill="#e4e4e1" class="s th" /></g>
+              <text class="cred" x="0" y="42" text-anchor="middle">@stokebuilder</text><text class="cred s2" x="0" y="50" text-anchor="middle">原作 X · Skillry 复刻</text></g>
+            <g class="f-ref" id="f-rf2" transform="translate(1496 250) rotate(-3)"><g filter="url(#f-s-wob)"><rect x="-50" y="-31" width="100" height="62" rx="2" class="s w th" /></g>
+              <image href="assets/img/ref_tardi.jpg" x="-46" y="-27" width="92" height="51.75" preserveAspectRatio="xMidYMid slice" />
+              <g filter="url(#f-s-wob)"><rect x="-13" y="-36" width="26" height="10" fill="#e4e4e1" class="s th" /></g>
+              <text class="cred" x="0" y="42" text-anchor="middle">@Tardigrade111</text><text class="cred s2" x="0" y="50" text-anchor="middle">原作 X · Skillry 复刻</text></g>
+            <g id="f-rft" transform="translate(1440 122) rotate(-2)"><g filter="url(#f-s-wob)"><rect x="-24" y="-10" width="48" height="20" rx="2" class="s th w" /></g><text class="tape" x="0" y="5" text-anchor="middle" style="font-size:13px">参考</text></g>
+          </svg>
+        </div></div><div class="mset-capfade"></div></div>
+
+        <div id="f-in"><div id="f-w">
+          <!-- ① 一看就知道是我做的：三支片子各一帧 -->
+          <div class="f-pc" id="f-b1" style="left:330px; top:250px; width:800px; height:450px"><img src="assets/img/brand_first.jpg" alt="" /><span class="tag">第一支</span></div>
+          <div class="f-pc" id="f-b2" style="left:560px; top:330px; width:800px; height:450px"><img src="assets/img/brand_prev.jpg" alt="" /><span class="tag">上一期</span></div>
+          <div class="f-pc" id="f-b3" style="left:790px; top:410px; width:800px; height:450px"><img src="assets/img/still_set.jpg" alt="" /><span class="tag">这一期</span></div>
+          <!-- 内容更突出：彩色只给真实画面 -->
+          <div class="win f-win" id="f-col" style="left:2280px; top:220px; width:1200px; height:634px"><div class="bar"><i></i><i></i><i></i><b>第一支 · 真实的智慧工厂界面</b></div><div class="body nocap"><video id="f-colv" src="assets/video/v1_after.mp4" muted playsinline data-start="@@C.l6-0.6@@" data-duration="@@C.l9-0.2-(C.l6-0.6)@@" data-media-start="0"></video></div></div>
+          <div class="note" id="f-n1"><span class="dot"></span><span class="ln"></span><span class="t">底色：深灰<small>不抢眼</small></span></div>
+          <div class="note" id="f-n2"><span class="dot"></span><span class="ln"></span><span class="t">彩色<small>只留给真实的画面</small></span></div>
+          <!-- 定调子：口号大字 → 真实画面 -->
+          <div class="win f-win" id="f-pro" style="left:3960px; top:260px; width:820px; height:501px"><div class="bar"><i></i><i></i><i></i><b>第一支 · 最早的开头</b></div><div class="body"><img src="assets/img/promo_end.jpg" alt="" /><video id="f-prov" src="assets/video/old_v1_promo.mp4" muted playsinline data-start="@@C.l11-0.4@@" data-duration="@@Math.min(4.3, C.l14-(C.l11-0.4))@@" data-media-start="0"></video></div></div>
+          <div class="f-strike" id="f-proX" style="left:3940px; top:510px; width:860px"></div>
+          <div class="win f-win" id="f-aft" style="left:4830px; top:260px; width:900px; height:486px"><div class="bar"><i></i><i></i><i></i><b>后来 · 直接放真实的画面</b></div><div class="body nocap"><img src="assets/img/hold/v1_after.jpg" alt="" /><video id="f-aftv" src="assets/video/v1_after.mp4" muted playsinline data-start="@@C.l10-0.3@@" data-duration="@@Math.min(5.4, C.l14+1-(C.l10-0.3))@@" data-media-start="0"></video></div></div>
+          <div class="f-src" id="f-q1" style="left:3960px; top:790px">像广告</div><div class="f-src" id="f-q2" style="left:4830px; top:790px">像教程</div>
+
+          <!-- ③ Skillry（画布 y + 1080） -->
+          <div class="win f-win" id="f-sk" style="left:330px; top:1250px; width:1260px; height:680px"><div class="bar"><i></i><i></i><i></i><b>Skillry · 大家用 Claude Opus 5.5 做的视频</b></div><div class="body"><div class="f-crop"><div class="src" style="width:1260px; height:787.5px; transform: translateY(-147.7px)"><img src="assets/img/hold/sk_list.jpg" alt="" style="position:absolute; inset:0; width:100%; height:100%" /><video id="f-skv" src="assets/video/sk_list.mp4" muted playsinline data-start="@@C.l20-0.6@@" data-duration="@@C.l26+0.2-(C.l20-0.6)@@" data-media-start="0" style="position:absolute; inset:0; width:100%; height:100%; display:block"></video>
+            <!-- 框的位置从 sk_list.mp4 第 13.3 秒那一帧量（标签胶囊的边、提示词那两行字），换录屏后要重量 -->
+            <div class="outline dark f-chip" id="f-ch1" style="left:148px; top:256px; width:204px; height:46px"></div><div class="outline dark f-chip" id="f-ch2" style="left:356px; top:256px; width:156px; height:46px"></div>
+            <div class="outline dark f-chip" id="f-ch3" style="left:516px; top:256px; width:157px; height:46px"></div><div class="outline dark f-chip" id="f-ch4" style="left:677px; top:256px; width:133px; height:46px"></div>
+            <div class="outline dark" id="f-pr" style="left:42px; top:480px; width:326px; height:50px"></div></div></div></div></div>
+          <div class="note" id="f-skn"><span class="dot"></span><span class="ln"></span><span class="t">作者的提示词</span></div>
+          <!-- 「每一支下面，还附了作者用的提示词」：点开一支，把提示词亮出来（口播说到提示词，画面就放出真的提示词）。
+               sk_stoke_prompt.mp4 第 0.3 秒那一帧；顶上带价格的横幅、导航、搜索框（1300 宽时 y < 206）都裁在窗口外面 -->
+          <div class="win f-win" id="f-pm0" style="left:960px; top:1300px; width:820px; height:560px"><div class="bar"><i></i><i></i><i></i><b>Skillry · 点开一支：作者用的提示词（@stokebuilder）</b></div><div class="body"><div class="f-crop"><div class="src" id="f-pm0s" style="width:1196px; height:747.5px"><img src="assets/img/sk_prompt0.jpg" alt="" style="position:absolute; left:0; top:0; width:1196px; height:747.5px" /></div></div></div></div>
+          <svg id="f-cr" viewBox="0 0 520 620" style="position:absolute; left:1300px; top:1240px; width:520px; height:620px; overflow:visible">
+            <g id="f-k1" transform="translate(260 90) rotate(-2)"><g filter="url(#f-s-wob)"><rect x="-150" y="-62" width="300" height="124" rx="5" class="f-pp" /><rect x="-26" y="-70" width="52" height="16" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+              <text x="0" y="12" text-anchor="middle" style="font: 700 34px ShuHei, sans-serif; fill: #161616">把事情讲清楚</text></g>
+            <g id="f-k2" transform="translate(260 290) rotate(1.5)"><g filter="url(#f-s-wob)"><rect x="-150" y="-62" width="300" height="124" rx="5" class="f-pp" /><rect x="-26" y="-70" width="52" height="16" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+              <text x="0" y="-6" text-anchor="middle" style="font: 700 30px ShuHei, sans-serif; fill: #161616">放真实的界面</text><text x="0" y="32" text-anchor="middle" style="font: 700 26px ShuHei, sans-serif; fill: #161616">把重点标出来</text></g>
+            <g id="f-k3" transform="translate(260 490) rotate(-1.5)"><g filter="url(#f-s-wob)"><rect x="-150" y="-62" width="300" height="124" rx="5" class="f-pp" /><rect x="-26" y="-70" width="52" height="16" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+              <text x="0" y="12" text-anchor="middle" style="font: 700 34px ShuHei, sans-serif; fill: #161616">我们做得出来</text></g>
+          </svg>
+
+          <!-- ④ 第一个参考（画布 x + 1920，y + 1080） -->
+          <div class="win f-win" id="f-r1a" style="left:2250px; top:1300px; width:620px; height:389px"><div class="bar"><i></i><i></i><i></i><b>参考一</b></div><div class="body"><video id="f-r1av" src="assets/video/ref_stoke.mp4" muted playsinline data-start="@@C.l33-0.4@@" data-duration="@@C.l34-(C.l33-0.4)@@" data-media-start="1"></video></div></div>
+          <div class="win f-win" id="f-r2a" style="left:2910px; top:1300px; width:620px; height:389px"><div class="bar"><i></i><i></i><i></i><b>参考二</b></div><div class="body"><video id="f-r2av" src="assets/video/ref_tardi.mp4" muted playsinline data-start="@@C.l33-0.2@@" data-duration="@@C.l34-(C.l33-0.2)@@" data-media-start="2"></video></div></div>
+          <div class="f-src" id="f-s1a" style="left:2250px; top:1710px">原作 X @stokebuilder · Skillry 复刻</div>
+          <div class="f-src" id="f-s2a" style="left:2910px; top:1710px">原作 X @Tardigrade111 · Skillry 复刻</div>
+          <div class="win f-win" id="f-top" style="left:2190px; top:1240px; width:1400px; height:540px"><div class="bar"><i></i><i></i><i></i><b>Skillry · 原作和复刻，并排播</b></div><div class="body"><div class="f-crop"><div class="src" style="width:1400px; height:875px; transform: translateY(-164px)"><video id="f-topv" src="assets/video/sk_stoke_top.mp4" muted playsinline data-start="@@C.l34-0.6@@" data-duration="@@C.l37+0.2-(C.l34-0.6)@@" data-media-start="0" style="width:100%; height:100%; display:block"></video></div></div></div></div>
+          <div class="f-src" id="f-s1b" style="left:2190px; top:1800px">原作 X @stokebuilder · Skillry 复刻</div>
+          <div class="win f-win" id="f-r1" style="left:2160px; top:1230px; width:1000px; height:603px"><div class="bar"><i></i><i></i><i></i><b>参考一 · 用动画讲难懂的概念</b></div><div class="body"><img src="assets/img/ref_stoke.jpg" alt="" /><video id="f-r1v" src="assets/video/ref_stoke.mp4" muted playsinline data-start="@@C.l37-0.3@@" data-duration="@@Math.min(5.2, C.l40-(C.l37-0.3))@@" data-media-start="0.3"></video>
+            <div class="outline" id="f-o1" style="left:6px; top:6px; width:986px; height:553px"></div>
+            <div class="outline" id="f-o2" style="left:20px; top:14px; width:950px; height:64px"></div>
+            <div class="outline" id="f-o3" style="left:404px; top:150px; width:184px; height:260px"></div>
+            <div class="outline" id="f-o4" style="left:620px; top:190px; width:330px; height:200px"></div></div></div>
+          <div class="f-src" id="f-s1c" style="left:2160px; top:1850px">原作 X @stokebuilder · Skillry 复刻</div>
+          <div class="f-quote" id="f-qa" style="left:3240px; top:1300px"><small>我当时跟 AI 说</small>「这个视觉好，有些效果我喜欢」</div>
+          <div class="f-quote" id="f-qb" style="left:3240px; top:1450px"><small>&nbsp;</small>「但密集的圆点不要，剪纸太重了」</div>
+          <div class="f-stage" id="f-ours" style="left:3240px; top:1300px; width:560px; height:315px"><div class="in" style="transform: scale(0.291667)"><div class="bg"></div><div class="ghosts"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ghost-bar"></div><div class="vig"></div><div class="grain"></div></div>
+            <div class="outline" id="f-p1" style="left:6px; top:6px; width:548px; height:303px"></div><div class="outline" id="f-p2" style="left:8px; top:8px; width:544px; height:62px"></div></div>
+          <div class="f-src" id="f-s3" style="left:3240px; top:1635px">这一期的舞台</div>
+          <div class="note" id="f-np1"><span class="dot"></span><span class="ln"></span><span class="t">深灰色的底 · 颗粒</span></div>
+          <div class="note" id="f-np2"><span class="dot"></span><span class="ln"></span><span class="t">顶上一排虚掉的小方块</span></div>
+          <div class="note" id="f-np3"><span class="dot"></span><span class="ln"></span><span class="t">圆点、剪纸<small>没拿</small></span></div>
+
+          <!-- 第一个参考的提示词（画布 x + 3840，y + 1080） -->
+          <div class="win f-win" id="f-pm" style="left:4100px; top:1220px; width:1300px; height:660px"><div class="bar"><i></i><i></i><i></i><b>Skillry · @stokebuilder 的提示词</b></div><div class="body"><div class="f-crop"><div class="src" style="width:1300px; height:812.5px; transform: translateY(-152.3px)"><video id="f-pmv" src="assets/video/sk_stoke_prompt.mp4" muted playsinline data-start="@@C.l44-0.6@@" data-duration="@@C.l51-0.2-(C.l44-0.6)@@" data-media-start="0" style="width:100%; height:100%; display:block"></video>
+            <div class="outline dark" id="f-u1" style="left:524px; top:321px; width:328px; height:26px"></div><div class="outline dark" id="f-u2" style="left:74px; top:348px; width:104px; height:26px"></div>
+            <div class="outline dark" id="f-u3" style="left:560px; top:375px; width:290px; height:26px"></div><div class="outline dark" id="f-u4" style="left:74px; top:402px; width:160px; height:26px"></div>
+            <div class="outline dark" id="f-u5" style="left:622px; top:456px; width:230px; height:26px"></div><div class="outline dark" id="f-u6" style="left:74px; top:483px; width:104px; height:26px"></div>
+            <div class="outline dark" id="f-u7" style="left:570px; top:483px; width:274px; height:26px"></div><div class="outline dark" id="f-u8" style="left:74px; top:510px; width:592px; height:26px"></div></div></div></div></div>
+          <div class="note" id="f-sk1"><span class="dot"></span><span class="ln"></span><span class="t">风格手册<small>就像我们写的 Skill</small></span></div>
+
+          <!-- ⑤ 第二个参考（画布 y + 2160） -->
+          <div class="win f-win" id="f-r2" style="left:240px; top:2290px; width:1000px; height:603px"><div class="bar"><i></i><i></i><i></i><b>参考二 · 线稿动画</b></div><div class="body"><img src="assets/img/ref_tardi.jpg" alt="" /><video id="f-r2v" src="assets/video/ref_tardi.mp4" muted playsinline data-start="@@C.l51-0.4@@" data-duration="@@Math.min(10.5, C.l59-(C.l51-0.4))@@" data-media-start="0"></video>
+            <div class="outline dark" id="f-t1" style="left:6px; top:6px; width:986px; height:553px"></div>
+            <div class="outline dark" id="f-t2" style="left:96px; top:372px; width:92px; height:44px"></div>
+            <div class="outline dark" id="f-t3" style="left:540px; top:60px; width:380px; height:300px"></div></div></div>
+          <div class="f-src" id="f-s2c" style="left:240px; top:2910px">原作 X @Tardigrade111 · Skillry 复刻</div>
+          <div class="f-quote" id="f-qc" style="left:1290px; top:2330px"><small>我当时说</small>「界面的风格和动画，这种挺好的」</div>
+          <div class="f-quote" id="f-qd" style="left:1290px; top:2480px"><small>&nbsp;</small>「做成极简的黑白」</div>
+          <div class="win f-win" id="f-ours2" style="left:1290px; top:2330px; width:560px; height:317px"><div class="bar"><i></i><i></i><i></i><b>上一期 · 一层一层搭出来</b></div><div class="body nocap"><img src="assets/img/hold/prev_section.jpg" alt="" /><video id="f-ours2v" src="assets/video/prev_section.mp4" muted playsinline data-start="@@C.l57-0.4@@" data-duration="@@Math.min(9, C.l60-(C.l57-0.4))@@" data-media-start="3.4"></video></div></div>
+          <div class="note" id="f-nt1"><span class="dot"></span><span class="ln"></span><span class="t">浅色底、橙色<small>没拿</small></span></div>
+          <div class="win f-win" id="f-tp" style="left:1290px; top:2330px; width:560px; height:250px"><div class="bar"><i></i><i></i><i></i><b>Skillry · @Tardigrade111 的提示词</b></div><div class="body"><div class="f-crop"><div class="src" style="width:560px; height:350px; transform: translate(-10px, -100px) scale(1.25)"><video id="f-tpv" src="assets/video/sk_tardi_prompt.mp4" muted playsinline data-start="@@C.l60-0.6@@" data-duration="@@C.l62+0.3-(C.l60-0.6)@@" data-media-start="0" style="width:448px; height:280px; display:block"></video></div></div></div></div>
+          <div class="note" id="f-nt2"><span class="dot"></span><span class="ln"></span><span class="t">想要的是这一点<small>细线、一点点搭起来</small></span></div>
+
+          <!-- ⑥ 小结（画布 x + 1920，y + 2160） -->
+          <svg id="f-sum" viewBox="0 0 1100 700" style="position:absolute; left:2330px; top:2370px; width:1100px; height:700px; overflow:visible">
+            <g filter="url(#f-s-wob)"><rect x="6" y="8" width="1080" height="560" rx="6" fill="#000" opacity="0.25" /><rect x="0" y="0" width="1080" height="560" rx="6" class="f-pp" /><rect x="500" y="-12" width="80" height="22" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+            <text x="70" y="96" style="font: 700 30px PuHui, sans-serif; fill: #6a6a6a">参考，我是这么用的</text>
+            <g class="f-li" id="f-li1"><path class="f-ck" d="M70 178 l14 16 l28 -34" /><text x="140" y="190" style="font: 700 40px ShuHei, sans-serif; fill: #161616">先想好自己要做什么，再去找</text></g>
+            <g class="f-li" id="f-li2"><path class="f-ck" d="M70 278 l14 16 l28 -34" /><text x="140" y="290" style="font: 700 40px ShuHei, sans-serif; fill: #161616">说清楚要它哪一点、不要哪一点</text></g>
+            <g class="f-li" id="f-li3"><path class="f-ck" d="M70 378 l14 16 l28 -34" /><text x="140" y="390" style="font: 700 40px ShuHei, sans-serif; fill: #161616">方向，还是我们自己的</text></g>
+            <g class="f-li" id="f-li4"><path class="f-ck" d="M70 478 l14 16 l28 -34" /><text x="140" y="490" style="font: 700 40px ShuHei, sans-serif; fill: #161616">用了别人的作品，标上出处</text></g>
+          </svg>
+
+          <!-- ⑦ 说「不要」，一版版收窄（画布 x + 3840，y + 2160） -->
+          <div class="f-quote" id="f-qe" style="left:4100px; top:2480px"><small>后面做的时候，对着画面说</small>「不要粉色的大光点」</div>
+          <div class="f-quote" id="f-qf" style="left:4100px; top:2650px"><small>&nbsp;</small>「文字太密了，像 PPT」</div>
+          <div class="f-pc" id="f-now" style="left:4960px; top:2480px; width:720px; height:405px"><img src="assets/img/still_set.jpg" alt="" /><span class="tag">现在：深灰</span></div>
+
+          <!-- ⑧ 五块（画布 y + 3240） -->
+          <div class="e-cap f-src" id="f-5c" style="left:200px; top:3400px">最后定下来的风格 · 分成五块</div>
+          <div class="f-row" id="f-5a" style="left:200px; top:3480px"><span class="k">底色和质感</span><span class="v">深灰、颗粒，加一点暗角</span></div>
+          <div class="f-row" id="f-5b" style="left:200px; top:3570px"><span class="k">颜色</span><span class="v">黑白灰，彩色只给真实画面</span></div>
+          <div class="f-row" id="f-5d" style="left:200px; top:3660px"><span class="k">字和排版</span><span class="v">字要少，一屏只放一个信息</span></div>
+          <div class="f-row" id="f-5e" style="left:200px; top:3750px"><span class="k">镜头</span><span class="v">在一张画面里走，不翻页</span></div>
+          <div class="f-row" id="f-5f" style="left:200px; top:3840px"><span class="k">节奏</span><span class="v">舒缓一点，一次只讲一件事</span></div>
+          <div class="f-stage" id="f-ex1" style="left:1140px; top:3500px; width:600px; height:338px"><div class="in" style="transform: scale(0.3125)"><div class="bg"></div><div class="ghosts"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ghost-bar"></div><div class="vig"></div><div class="grain"></div></div></div>
+          <div class="f-pc" id="f-ex2" style="left:1140px; top:3500px; width:600px; height:338px"><img src="assets/img/acts/actF.jpg" alt="" /></div>
+          <div class="f-pc" id="f-ex3" style="left:1140px; top:3500px; width:600px; height:338px"><img src="assets/img/acts/actB.jpg" alt="" /></div>
+          <div class="f-pc" id="f-ex4" style="left:1140px; top:3500px; width:600px; height:338px"><img src="assets/img/acts/actD.jpg" alt="" /></div>
+          <div class="f-pc" id="f-ex5" style="left:1140px; top:3500px; width:600px; height:338px"><img src="assets/img/acts/actC.jpg" alt="" /></div>
+
+          <!-- ⑨ 写进 Skill（画布 x + 1920，y + 3240） -->
+          <div id="f-bsw"><div class="code doc" id="f-bs"><div class="tab say"><span class="s">写进 Skill：每一支都一样的部分</span><b>mihua-video / brand-system.md</b></div><!--@@INCLUDE:src/partials/brand-system.html@@-->
+            <div class="hl" id="f-bh8" style="top:87.25px"></div><div class="hl" id="f-bh9" style="top:110.5px"></div><div class="hl" id="f-bh10" style="top:133.75px"></div><div class="hl" id="f-bh12" style="top:180.25px"></div><div class="hl" id="f-bh21" style="top:389.5px"></div></div></div>
+          <div class="win f-win" id="f-sd" style="left:2350px; top:3420px; width:960px; height:470px"><div class="bar"><i></i><i></i><i></i><b>Claude Code 官方文档 · Skills</b></div><div class="body" style="background:#fafaf9"><div class="f-crop"><div class="src" style="transform: translate(-260px, -150px) scale(0.92)"><img src="assets/web/doc_skills.png" alt="" style="width:1280px; height:800px; display:block" /><div class="outline dark" id="f-sdb" style="left:357px; top:274px; width:258px; height:32px"></div></div></div></div></div>
+          <div class="note" id="f-sdn"><span class="dot"></span><span class="ln"></span><span class="t">写给 AI 的工作手册<small>用得上的时候，AI 自己去读</small></span></div>
+          <div class="f-pc" id="f-e1" style="left:2050px; top:3500px; width:520px; height:292px"><img src="assets/img/brand_first.jpg" alt="" /><span class="tag">第一支</span></div>
+          <div class="f-pc" id="f-e2" style="left:2620px; top:3500px; width:520px; height:292px"><img src="assets/img/brand_prev.jpg" alt="" /><span class="tag">上一期</span></div>
+          <div class="f-pc" id="f-e3" style="left:3190px; top:3500px; width:520px; height:292px"><img src="assets/img/still_set.jpg" alt="" /><span class="tag">这一期</span></div>
+        </div></div>
+        <!-- 画面上真的签名和头像（外壳里的，固定位置） -->
+        <div class="outline" id="f-sigbox"></div><div class="outline" id="f-avbox"></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/kit.js@@-->
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          kPinTimeline(tl, C.end);
+          // 章节卡：05 风格（三块颜料依次点出来、画笔刷一笔）
+          const scam = hfCam("#f-setw");
+          const S = hfCard("f-s-", tl, scam, 4, { prop: C.l1 - 0.2, hold: C.l3 });
+          gsap.set("#f-paper", { opacity: 0 });
+          const o1 = C.l3 - 0.5;
+          tl.to("#f-card", { opacity: 0, filter: "blur(16px)", scale: 1.06, duration: 0.6, ease: "power2.in" }, o1);
+          tl.set("#f-card", { scale: 1, filter: "blur(0px)" }, o1 + 0.65);
+          gsap.set("#f-in", { opacity: 0 });
+          tl.fromTo("#f-in", { opacity: 0, filter: "blur(16px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" }, o1 + 0.3);
+          const cam = hfCam("#f-w");
+          const mbh = document.getElementById("f-mbhg"), mbv = document.getElementById("f-mbvg");
+          const whip = (x, y, at, ax) => hfWhip(tl, cam, "#f-w", ax === "y" ? mbv : mbh, x, y, 1, at, ax || "x");
+          const show = (sel, at, d) => tl.fromTo(sel, { opacity: 0 }, { opacity: 1, duration: d ?? 0.45, ease: "power2.out" }, at);
+          const hide = (sel, at, d) => tl.to(sel, { opacity: 0, duration: d ?? 0.4 }, at);
+          // 线描小卡（wob 滤镜那套画法）的填充色
+          document.querySelectorAll(".f-pp").forEach((r) => { r.setAttribute("fill", "#f7f7f5"); r.setAttribute("stroke", "#161616"); r.setAttribute("stroke-width", "3.4"); });
+          document.querySelectorAll(".f-ck").forEach((p) => { p.setAttribute("fill", "none"); p.setAttribute("stroke", "#161616"); p.setAttribute("stroke-width", "6"); p.setAttribute("stroke-linecap", "round"); p.setAttribute("stroke-linejoin", "round"); });
+
+          // ── ① 一看就知道是我做的：三支片子各一帧，框住画面上真的签名和头像 ──
+          ["#f-b1", "#f-b2", "#f-b3"].forEach((b, i) => hfArrive(tl, b, C.l3 + 0.1 + i * 0.3, { z: -1200, rx: 8 }));
+          hfOutline(tl, "#f-sigbox", C.l4 + 0.1, 1.6);
+          hfOutline(tl, "#f-avbox", C.l4 + 1.0, 1.2);
+          tl.to(["#f-b1", "#f-b2"], { opacity: 0.55, duration: 0.4 }, C.l5 - 0.2);
+          cam.breathe(tl, 960, 540, 1, C.l3 + 1.2, C.l6 - 0.45, 0.03);
+          // 让内容更突出：深灰的底不抢眼，彩色只给真实画面
+          whip(2880, 540, C.l6 - 0.45);
+          hfArrive(tl, "#f-col", C.l6 - 0.3, { z: -1400, rx: 10 });
+          pinAt("#f-n1", 2260, 180, true);
+          hfNote(tl, "#f-n1", C.l7 + 0.1, 2.6);
+          pin("#f-n2", "#f-col", "r", { at: 0.5 });
+          hfNote(tl, "#f-n2", C.l8 + 0.1, 2.0);
+          // 定调子：口号大字 → 真实画面
+          whip(4800, 540, C.l9 - 0.45);
+          // 「同样的内容，做得克制一点，就像教程」→「满屏的口号大字，就像广告了」：先出教程那样的，再出广告那样的
+          hfArrive(tl, "#f-aft", C.l10 - 0.2, { z: -1400, rx: 10 });
+          show("#f-q2", C.l10 + 0.6);
+          hfArrive(tl, "#f-pro", C.l11 - 0.5, { z: -1400, rx: 10 });
+          show("#f-q1", C.l11 + 0.4);
+          tl.to("#f-pro", { opacity: 0.45, filter: "grayscale(1) brightness(0.7)", duration: 0.5 }, C.l13 - 0.4);
+          tl.fromTo("#f-proX", { opacity: 1, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.4, ease: "power3.out", immediateRender: false }, C.l13 - 0.3);
+          gsap.set("#f-proX", { opacity: 0 });
+
+          // ── ② 怎么来的：布景板上贴一张纸，写着作者那句话 ──
+          const o2 = C.l14 - 0.5;
+          tl.to("#f-in", { opacity: 0, filter: "blur(14px)", duration: 0.5 }, o2);
+          tl.set(S.corners.filter((_, j) => j !== 4), { opacity: 0.32 }, o2);
+          tl.set("#f-card", { opacity: 1 }, o2 + 0.3);
+          scam.focus(tl, S.K[4].look[0] + 30, S.K[4].look[1] - 10, 2.4, o2 + 0.3, 0.01);
+          tl.fromTo("#f-card", { opacity: 0, filter: "blur(14px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.6, immediateRender: false }, o2 + 0.3);
+          S.boil(o2, C.l20);
+          tl.set("#f-paper", { opacity: 1 }, C.l15 + 0.6);
+          S.drawEls([...document.querySelectorAll("#f-paper > g rect")], C.l15 + 0.6, 0.45);
+          tl.fromTo("#f-paper text", { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.5 }, C.l16);
+          // 背景就用我的个人 IP 背景：退到空的舞台上
+          tl.to("#f-card", { opacity: 0, duration: 0.7 }, C.l17 - 0.3);
+          const ipn = document.createElement("div"); ipn.className = "note"; ipn.id = "f-ipn"; ipn.innerHTML = '<span class="dot"></span><span class="ln"></span><span class="t">个人 IP 背景<small>深灰、虚掉的小方块、颗粒</small></span>'; document.getElementById("f-root").appendChild(ipn);
+          pinAt("#f-ipn", 960, 200, false);
+          hfNote(tl, "#f-ipn", C.l17 + 0.3, Math.min(2.6, C.l18 - 0.4 - (C.l17 + 0.3)));
+          // 「但有些感觉，光靠说是说不清的」：回到布景板，米花头上冒一个问号；「这时候，我就会找参考」：旁边钉上两张参考
+          gsap.set(["#f-qm", "#f-rf1", "#f-rf2", "#f-rft"], { opacity: 0 });
+          tl.to("#f-card", { opacity: 1, duration: 0.6 }, C.l18 - 0.3);
+          tl.set("#f-qm", { opacity: 1 }, C.l18 + 0.5);
+          S.drawEls([...document.querySelectorAll("#f-qm path")], C.l18 + 0.5, 0.4);
+          tl.fromTo("#f-qm text", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C.l18 + 0.8);
+          S.pose(C.l18 + 0.4, "mh-down", [-2, -4], "oh");
+          tl.to("#f-qm", { opacity: 0, duration: 0.4 }, C.l19 - 0.1);
+          [["#f-rf1", C.l19 + 0.1], ["#f-rf2", C.l19 + 0.45]].forEach(([g, t]) => tl.fromTo(g, { opacity: 0 }, { opacity: 1, duration: 0.45, ease: "power2.out" }, t));   // g 本身带 transform 属性，只动透明度
+          tl.to("#f-rft", { opacity: 1, duration: 0.35 }, C.l19 + 0.8);
+          S.pose(C.l19 + 0.2, "mh-point", [4, -3], "smile");
+          tl.to("#f-card", { opacity: 0, duration: 0.45 }, C.l20 - 0.75);
+
+          // ── ③ 参考去哪找：Skillry 真实录屏 ──
+          tl.set("#f-in", { opacity: 1, filter: "blur(0px)" }, C.l20 - 0.6);
+          cam.focus(tl, 960, 1620, 1, C.l20 - 0.6, 0.01);
+          hfArrive(tl, "#f-sk", C.l20 - 0.5, { z: -1400, rx: 10 });
+          // 动态图形、讲解、3D 场景、游戏：录屏里鼠标走到哪个分类，框到哪个
+          [["#f-ch1", C.l24 - 0.1], ["#f-ch2", C.l24 + 0.95], ["#f-ch3", C.l24 + 1.75], ["#f-ch4", C.l24 + 2.65]].forEach(([c, t]) => hfOutline(tl, c, t + 0.2, 0.8));
+          hfOutline(tl, "#f-pr", C.l25 + 0.3, 2.4);
+          // 说到「提示词」：列表上框出提示词那一行，旁边弹出点开后的提示词页面，慢慢往下看几行；换话题（「那这么多，怎么选呢」）前收掉
+          gsap.set("#f-pm0", { opacity: 0 });
+          hfArrive(tl, "#f-pm0", C.l25 + 0.55, { z: -1200, rx: 8 });
+          gsap.set("#f-pm0s", { x: -28, y: -190 });
+          tl.fromTo("#f-pm0s", { x: -28, y: -190 }, { x: -28, y: -225, duration: 2.6, ease: "power1.inOut" }, C.l25 + 1.4);
+          tl.to("#f-pm0", { opacity: 0, filter: "blur(10px)", duration: 0.45, ease: "power2.in" }, C.l26 - 0.4);
+          // 怎么选：先想这期要做什么 → 三张小卡
+          tl.to("#f-sk", { x: -150, scale: 0.86, opacity: 0.5, duration: 0.7, ease: "power3.inOut" }, C.l27 - 0.3);
+          [["#f-k1", C.l29 - 0.2], ["#f-k2", C.l30 - 0.2], ["#f-k3", C.l32 - 0.2]].forEach(([k, t]) => {
+            gsap.set(k, { opacity: 0 }); tl.set(k, { opacity: 1 }, t);
+            S.drawEls([...document.querySelectorAll(k + " rect")], t, 0.45);
+            tl.fromTo(document.querySelectorAll(k + " text"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, t + 0.3);
+          });
+
+          // ── ④ 第一个参考 ──
+          whip(2880, 1620, C.l33 - 0.45);
+          ["#f-r1a", "#f-r2a"].forEach((w, i) => hfArrive(tl, w, C.l33 - 0.2 + i * 0.25, { z: -1200, rx: 8 }));
+          show(["#f-s1a", "#f-s2a"], C.l33 + 0.3);
+          hide(["#f-r2a", "#f-s2a", "#f-r1a", "#f-s1a"], C.l34 - 0.4);
+          hfArrive(tl, "#f-top", C.l34 - 0.5, { z: -1400, rx: 10 });
+          show("#f-s1b", C.l34 + 0.2);
+          hide(["#f-top", "#f-s1b"], C.l37 - 0.4);
+          // 我当时跟 AI 说：两句话
+          hfArrive(tl, "#f-r1", C.l37 - 0.4, { z: -1400, rx: 10 });
+          show("#f-s1c", C.l37);
+          hfReveal(tl, "#f-qa", C.l38 - 0.1);
+          hfReveal(tl, "#f-qb", C.l39 - 0.1);
+          hfOutline(tl, "#f-o3", C.l39 + 0.7, 1.3);    // 密集的圆点
+          hfOutline(tl, "#f-o4", C.l39 + 1.5, 1.2);    // 剪纸
+          // 所以只拿了它的底：和这一期的舞台并排对上
+          hide(["#f-qa", "#f-qb"], C.l40 - 0.3);
+          show("#f-ours", C.l40 - 0.1, 0.5); show("#f-s3", C.l40 + 0.2);
+          hfOutline(tl, "#f-o1", C.l41, 2.0); hfOutline(tl, "#f-p1", C.l41 + 0.1, 2.0);
+          pin("#f-np1", "#f-ours", "r", { at: 0.6 }); hfNote(tl, "#f-np1", C.l41 + 0.3, 2.0);
+          hfOutline(tl, "#f-o2", C.l42, 2.2); hfOutline(tl, "#f-p2", C.l42 + 0.1, 2.2);
+          pin("#f-np2", "#f-ours", "r", { at: 0.12 }); hfNote(tl, "#f-np2", C.l42 + 0.3, 2.2);
+          hfOutline(tl, "#f-o3", C.l43, 1.8); hfOutline(tl, "#f-o4", C.l43 + 0.1, 1.8);
+          pinAt("#f-np3", 2160 + 404, 1270 + 150, true); hfNote(tl, "#f-np3", C.l43 + 0.3, 1.8);
+          // 它的提示词：一行一行框出来
+          whip(4800, 1620, C.l44 - 0.45);
+          hfArrive(tl, "#f-pm", C.l44 - 0.4, { z: -1400, rx: 10 });
+          cam.focus(tl, 4600, 1560, 1.35, C.l45 + 0.6, 1.0);
+          [["#f-u1", C.l46], ["#f-u2", C.l46 + 0.15], ["#f-u3", C.l46 + 0.9], ["#f-u4", C.l46 + 1.05]].forEach(([u, t]) => hfOutline(tl, u, t, 2.6));
+          [["#f-u5", C.l47 - 0.1], ["#f-u6", C.l47 + 0.05]].forEach(([u, t]) => hfOutline(tl, u, t, 2.8));
+          [["#f-u7", C.l48 - 0.1], ["#f-u8", C.l48 + 0.05]].forEach(([u, t]) => hfOutline(tl, u, t, 4.2));
+          cam.focus(tl, 4800, 1620, 1, C.l50 - 0.4, 0.9);
+          pin("#f-sk1", "#f-pm", "r", { at: 0.55 });
+          hfNote(tl, "#f-sk1", C.l50, 2.2);
+
+          // ── ⑤ 第二个参考 ──
+          whip(960, 2700, C.l51 - 0.5, "y");
+          hfArrive(tl, "#f-r2", C.l51 - 0.4, { z: -1400, rx: 10 });
+          show("#f-s2c", C.l51);
+          hfReveal(tl, "#f-qc", C.l55 - 0.1);
+          hfReveal(tl, "#f-qd", C.l56 - 0.1);
+          // 我们拿的：干净的线条、一点点搭起来——上一期就是这样一层层搭出来的
+          hide(["#f-qc", "#f-qd"], C.l57 - 0.3);
+          hfArrive(tl, "#f-ours2", C.l57 - 0.2, { z: -1200, rx: 8 });
+          // 浅色底和橙色，没拿
+          hfOutline(tl, "#f-t1", C.l59, 1.8); hfOutline(tl, "#f-t2", C.l59 + 0.3, 1.5);
+          pin("#f-nt1", "#f-r2", "r", { at: 0.66 }); hfNote(tl, "#f-nt1", C.l59 + 0.4, 1.6);
+          // 提示词只有一两句
+          hide("#f-ours2", C.l60 - 0.5);
+          hfArrive(tl, "#f-tp", C.l60 - 0.4, { z: -1200, rx: 8 });
+          // 直接看画面，把想要的那一点指给 AI 看
+          hide("#f-tp", C.l62 - 0.3);
+          hfOutline(tl, "#f-t3", C.l63, 2.4);
+          pin("#f-nt2", "#f-r2", "r", { at: 0.28 }); hfNote(tl, "#f-nt2", C.l63 + 0.3, 2.2);
+
+          // ── ⑥ 小结 ──
+          whip(2880, 2700, C.l64 - 0.45);
+          gsap.set("#f-sum", { opacity: 0 }); tl.set("#f-sum", { opacity: 1 }, C.l64 - 0.2);
+          S.drawEls([...document.querySelectorAll("#f-sum > g rect")], C.l64 - 0.2, 0.5);
+          tl.fromTo("#f-sum > text", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l64 + 0.3);
+          [["#f-li1", C.l65], ["#f-li2", C.l66], ["#f-li3", C.l67], ["#f-li4", C.l68]].forEach(([li, t]) => {
+            gsap.set(li, { opacity: 0 }); tl.set(li, { opacity: 1 }, t - 0.1);
+            S.drawEls([...document.querySelectorAll(li + " path")], t - 0.1, 0.35);
+            tl.fromTo(document.querySelectorAll(li + " text"), { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.4 }, t);
+          });
+
+          // ── ⑦ 对着画面说「不要」，一版一版收窄到现在 ──
+          // 「后面做的时候，我也是对着画面，一条一条说不要」时还停在小结上；说到第一句「不要」再甩过去
+          whip(4800, 2700, C.l71 - 0.55);
+          hfReveal(tl, "#f-qe", C.l71 - 0.05);
+          hfReveal(tl, "#f-qf", C.l72 - 0.1);
+          hfArrive(tl, "#f-now", C.l74 - 0.3, { z: -1400, rx: 10 });
+
+          // ── ⑧ 五块 ──
+          whip(960, 3780, C.l75 - 0.5, "y");
+          show("#f-5c", C.l75);
+          const rows = ["#f-5a", "#f-5b", "#f-5d", "#f-5e", "#f-5f"], ex = ["#f-ex1", "#f-ex2", "#f-ex3", "#f-ex4", "#f-ex5"];
+          // 「我把它分成五块」：五块的名字先一起排出来（淡），说到哪块哪块亮、说明和例子出来
+          gsap.set(rows.map((r) => r + " .v"), { opacity: 0 });
+          tl.fromTo(rows, { opacity: 0, x: -16 }, { opacity: 0.45, x: 0, duration: 0.45, ease: "power3.out", stagger: 0.12 }, C.l75 + 0.6);
+          [C.l78, C.l79, C.l80, C.l81, C.l82].forEach((t, i) => {
+            tl.to(rows[i], { opacity: 1, duration: 0.3 }, t - 0.15);
+            tl.to(rows[i] + " .v", { opacity: 1, duration: 0.4 }, t - 0.1);
+            if (i) { tl.to(rows[i - 1], { opacity: 0.4, duration: 0.3 }, t - 0.15); tl.to(ex[i - 1], { opacity: 0, duration: 0.3 }, t - 0.15); }
+            tl.fromTo(ex[i], { opacity: 0, scale: 0.96 }, { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }, t - 0.1);
+          });
+
+          // ── ⑨ 写进 Skill ──
+          whip(2880, 3780, C.l83 - 0.45);
+          hfArrive(tl, "#f-bs", C.l84 - 0.3, { z: -1200, rx: 8 });
+          tl.to("#f-bs", { opacity: 0.35, duration: 0.4 }, C.l85 - 0.3);
+          hfArrive(tl, "#f-sd", C.l85 - 0.2, { z: -1200, rx: 8 });
+          hfOutline(tl, "#f-sdb", C.l86 + 0.1);
+          pin("#f-sdn", "#f-sd", "b", { at: 0.3 }); hfNote(tl, "#f-sdn", C.l87, 2.6);
+          hide("#f-sd", C.l89 - 0.4);
+          tl.to("#f-bs", { opacity: 1, duration: 0.4 }, C.l89 - 0.4);
+          hfFocus(tl, "#f-bs", [2, 3, 4, 6, 15], C.l89);
+          ["#f-bh8", "#f-bh9", "#f-bh10", "#f-bh12"].forEach((h, i) => tl.fromTo(h, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.out" }, C.l89 + 0.2 + i * 0.15));
+          tl.fromTo("#f-bh21", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, C.l90 + 0.4);
+          // 镜头和画面，每一支按内容重新做：三支片子的画面各不一样
+          hide("#f-bs", C.l91 - 0.4);
+          ["#f-e1", "#f-e2", "#f-e3"].forEach((e, i) => hfArrive(tl, e, C.l91 - 0.3 + i * 0.25, { z: -1200, rx: 8 }));
+          tl.to("#f-in", { opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in" }, C.end - 0.6);
+
+          window.__timelines["actF"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

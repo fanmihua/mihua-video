@@ -1,0 +1,13 @@
+<pre><span class="n">112</span>  <span class="k">const</span> [mergedClassNames, mergedStyles] = useMergeSemantic([contextClassNames, classNames], [contextStyles, contextStyleRoot, styles, styleRoot], {
+<span class="n">113</span>    props: mergedProps
+<span class="n">114</span>  });
+<span class="n">115</span>  <span class="k">const</span> classString = clsx(`${prefixCls}-wrapper`, {
+<span class="n">116</span>    [`${prefixCls}-rtl`]: direction === <span class="s">&#x27;rtl&#x27;</span>,
+<span class="n">117</span>    [`${prefixCls}-wrapper-checked`]: mergedChecked,
+<span class="n">118</span>    [`${prefixCls}-wrapper-disabled`]: mergedDisabled,
+<span class="n">119</span>    [`${prefixCls}-wrapper-in-form-item`]: isFormItemInput
+<span class="n">120</span>  }, contextClassName, className, mergedClassNames.root, rootClassName, cssVarCls, rootCls, hashId);
+<span class="n">121</span>  <span class="k">const</span> checkboxClass = clsx(mergedClassNames.icon, {
+<span class="n">122</span>    [`${prefixCls}-indeterminate`]: indeterminate
+<span class="n">123</span>  }, TARGET_CLS, hashId);
+<span class="n">124</span><span class="c">  // ============================ Event Lock ============================</span></pre>

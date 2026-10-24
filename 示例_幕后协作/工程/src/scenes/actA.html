@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actA 开场。
+           ① 钩子：这一期自己的一帧（片场全景）拆成五层——舞台 / 片场 / 米花 / 签名·头像·导航 / 字幕，沿一条横轴往纵深排开，
+              每层是一张白纸（深色的层反相），轴上一个点、一条虚线落到薄片上、一个编号名字；最前面是完整的一帧。
+           ② 上一期：缩成小窗口（标「上一期」）；三条同学评论原样摆（不推、不框）。
+           ③ 「我到底给了 AI 什么？」→ 回到拆层图，各层合回一帧。
+           ④ 微观片场：光亮起，七个角落一笔笔画出来，米花走进来，说到哪章就到哪个角落、道具动一下。 */
+        #a-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #a-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        #a-set { position: absolute; inset: 0; }
+        #a-set .mset-light { opacity: 0; }
+        #a-capfade { opacity: 0; }
+
+        /* ① 拆层图 */
+        #a-hook { position: absolute; inset: 0; }
+        #a-persp { position: absolute; inset: 0; perspective: 3600px; perspective-origin: 54% 26%; }
+        #a-rig { position: absolute; left: 104px; top: 430px; width: 500px; height: 281px; transform-style: preserve-3d; }
+        .a-sl { position: absolute; left: 0; top: 0; width: 500px; height: 281px; transform-style: preserve-3d; }
+        .a-pp { position: absolute; inset: 0; border-radius: 5px; background: #f1f1ef; box-shadow: 0 0 0 1px rgba(0,0,0,0.25), 0 30px 60px rgba(0,0,0,0.45); overflow: hidden; }
+        .a-fr { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(0.260417); transform-origin: 0 0; overflow: hidden; }
+        .a-fr.inv, .a-inv { filter: invert(1) contrast(1.05); }
+        .a-fr > img.full { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+        #a-sf .a-pp { background: #161617; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.28), 0 40px 90px rgba(0,0,0,0.6); }
+        .a-capx { position: absolute; left: 0; right: 0; bottom: 54px; text-align: center; }
+        .a-capx span { font-family: "ShuHei", sans-serif; font-weight: 700; font-size: 38px; line-height: 1.4; color: #f6f6f6; text-shadow: 0 2px 6px rgba(0,0,0,0.85); }
+        .a-nav span:first-child { --on: 1; color: rgba(255,255,255,0.96); }
+        /* 轴上的点、落到薄片上的虚线、编号名字（都跟着薄片走） */
+        .a-tag { position: absolute; left: 290px; top: -150px; width: 0; height: 150px; }
+        .a-tag i { position: absolute; left: -8px; top: -8px; width: 16px; height: 16px; border-radius: 50%; background: #f4f4f4; box-shadow: 0 0 0 6px rgba(255,255,255,0.14); }
+        .a-tag u { position: absolute; left: -1px; top: 8px; width: 0; height: 142px; border-left: 2px dashed rgba(255,255,255,0.62); transform-origin: 50% 0; }
+        .a-tag b { position: absolute; left: -110px; top: -86px; width: 220px; text-align: center; white-space: nowrap; font: 700 34px/1 "ShuHei", sans-serif; color: #f4f4f6; }
+        .a-tag b em { display: block; margin-bottom: 10px; font: 500 20px/1 "PuHui", sans-serif; font-style: normal; letter-spacing: 0.12em; color: rgba(255,255,255,0.55); }
+        #a-ax { position: absolute; left: 290px; top: -150px; width: 2600px; height: 2px; background: rgba(255,255,255,0.7); transform-origin: 0 50%; }
+        #a-hnote { left: 120px; top: 860px; }
+
+        /* ② 上一期 + 同学评论 */
+        #a-prev { left: 528px; top: 236px; width: 864px; height: 468px; opacity: 0; }
+        #a-prev .body video { object-fit: cover; }
+        #a-pnote { left: 300px; top: 806px; }
+        .a-fb { position: absolute; left: 1100px; width: 610px; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 30px 70px rgba(0,0,0,0.5); opacity: 0; }
+        .a-fb img { display: block; width: 100%; height: auto; }
+        #a-fbn { left: 1100px; top: 196px; }
+        #a-q { top: 470px; }
+        #a-q .h-m { color: #f4f4f6; }
+      </style>
+      <div id="a-root" data-composition-id="actA" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <!-- ④ 微观片场（镜头作用在 #a-w 上） -->
+        <div id="a-w">
+          <div class="mset" id="a-set"><!--@@INCLUDE:src/partials/set/set_actA.html@@--></div>
+        </div>
+        <div class="mset-capfade" id="a-capfade"></div>
+
+        <!-- ① 拆层图：这一期自己的一帧 -->
+        <div id="a-hook">
+          <div id="a-persp"><div id="a-rig">
+            <div id="a-ax"></div>
+            <div class="a-sl" id="a-s5"><div class="a-pp"><div class="a-fr inv"><div class="bg"></div><div class="ghosts"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="ghost-bar"></div><div class="vig"></div></div></div>
+              <div class="a-tag"><u></u><i></i><b><em>01</em>舞台</b></div></div>
+            <div class="a-sl" id="a-s4"><div class="a-pp"><div class="a-fr"><img class="full" src="assets/img/layer_set.png" alt="" /></div></div>
+              <div class="a-tag"><u></u><i></i><b><em>02</em>片场</b></div></div>
+            <div class="a-sl" id="a-s3"><div class="a-pp"><div class="a-fr"><img class="full" src="assets/img/layer_mh.png" alt="" /></div></div>
+              <div class="a-tag"><u></u><i></i><b><em>03</em>米花</b></div></div>
+            <div class="a-sl" id="a-s2"><div class="a-pp"><div class="a-fr"><img class="sig a-inv" src="assets/img/signature.png" alt="" /><div class="avatar"><img src="assets/img/avatar.png" alt="" /></div>
+                <div class="nav a-nav a-inv"><span><em>01</em>选题</span><span><em>02</em>口播</span><span><em>03</em>分镜</span><span><em>04</em>声音</span><span><em>05</em>风格</span><span><em>06</em>协作</span><span><em>07</em>省额度</span></div></div></div>
+              <div class="a-tag"><u></u><i></i><b><em>04</em>签名·头像·导航</b></div></div>
+            <div class="a-sl" id="a-s1"><div class="a-pp"><div class="a-fr inv"><div class="a-capx"><span>把这个小片场，一个角落一个角落逛一遍</span></div></div></div>
+              <div class="a-tag"><u></u><i></i><b><em>05</em>字幕</b></div></div>
+            <div class="a-sl" id="a-sf"><div class="a-pp"><div class="a-fr">
+                <div class="bg"></div><div class="ghosts"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="vig"></div>
+                <img class="full" src="assets/img/layer_set.png" alt="" /><img class="full" src="assets/img/layer_mh.png" alt="" />
+                <img class="sig" src="assets/img/signature.png" alt="" /><div class="avatar"><img src="assets/img/avatar.png" alt="" /></div>
+                <div class="nav a-nav"><span><em>01</em>选题</span><span><em>02</em>口播</span><span><em>03</em>分镜</span><span><em>04</em>声音</span><span><em>05</em>风格</span><span><em>06</em>协作</span><span><em>07</em>省额度</span></div>
+                <div class="a-capx"><span>把这个小片场，一个角落一个角落逛一遍</span></div>
+              </div></div>
+              <div class="a-tag"><u></u><i></i><b><em>成片</em>完整的一帧</b></div></div>
+          </div></div>
+          <div class="note" id="a-hnote"><span class="dot"></span><span class="ln"></span><span class="t">这一期的一帧<small>拆开是五层</small></span></div>
+        </div>
+
+        <!-- ② 上一期（缩成小窗口）+ 三条同学评论（原样摆） -->
+        <div class="win" id="a-prev"><div class="bar"><i></i><i></i><i></i><b>上一期 · 组件库那一期</b></div>
+          <div class="body nocap">
+            <video id="a-pv1" src="assets/video/prev_hook.mp4" muted playsinline data-start="@@C.l2-0.3@@" data-duration="@@C.l5-0.1-(C.l2-0.3)@@" data-media-start="0"></video>
+            <video id="a-pv2" src="assets/video/prev_section.mp4" muted playsinline data-start="@@C.l5-0.3@@" data-duration="@@C.l8-(C.l5-0.3)@@" data-media-start="0.9"></video>
+          </div>
+        </div>
+        <div class="note" id="a-pnote"><span class="dot"></span><span class="ln"></span><span class="t">上一期里的动画<small>剖面图一层层拆开</small></span></div>
+        <div class="note" id="a-fbn"><span class="dot"></span><span class="ln"></span><span class="t">同学们的评论<small>原样截图</small></span></div>
+        <div class="a-fb" id="a-fb1" style="top:250px"><img src="assets/img/fb1.png" alt="" /></div>
+        <div class="a-fb" id="a-fb2" style="top:404px"><img src="assets/img/fb2.png" alt="" /></div>
+        <div class="a-fb" id="a-fb3" style="top:566px"><img src="assets/img/fb3.png" alt="" /></div>
+        <div class="line" id="a-q"><span class="h-m" id="a-qt">我到底给了 AI 什么？</span></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          const cam = hfCam("#a-w");
+          const S = hfSet("a-s-", tl);
+
+          // ── ① 拆层图 ──
+          const SL = ["#a-sf", "#a-s1", "#a-s2", "#a-s3", "#a-s4", "#a-s5"];   // 最前面是完整的一帧，往后依次是 05 字幕 … 01 舞台
+          const DZ = 467;
+          gsap.set("#a-rig", { rotationY: -40, x: 0, y: 0 });
+          SL.forEach((s, k) => gsap.set(s, { z: 0 }));
+          gsap.set(".a-tag u", { scaleY: 0 }); gsap.set(".a-tag i", { scale: 0 }); gsap.set(".a-tag b", { opacity: 0, y: 14 });
+          gsap.set("#a-ax", { rotationY: 90, scaleX: 0 });
+          tl.fromTo("#a-hook", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 0);
+          // 薄片从完整的一帧后面沿着轴退开
+          SL.forEach((s, k) => { if (k) tl.to(s, { z: -k * DZ, duration: 1.3, ease: "expo.out" }, 0.35 + k * 0.16); });
+          tl.to("#a-ax", { scaleX: 1, duration: 1.1, ease: "power3.inOut" }, 1.5);
+          SL.forEach((s, k) => {
+            tl.to(`${s} .a-tag i`, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 1.8 + k * 0.12);
+            tl.to(`${s} .a-tag u`, { scaleY: 1, duration: 0.35, ease: "power3.out" }, 1.9 + k * 0.12);
+            tl.to(`${s} .a-tag b`, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out" }, 2.0 + k * 0.12);
+          });
+          hfNote(tl, "#a-hnote", 2.6, 2.6);
+          // 镜头沿着轴慢慢走
+          tl.to("#a-rig", { rotationY: -38, x: 14, duration: 5.3, ease: "sine.inOut" }, 0);
+
+          // ── ② 上一期 → 同学评论 ──
+          tl.to("#a-hook", { scale: 0.84, filter: "blur(7px) brightness(0.4)", duration: 0.8, ease: "power2.inOut" }, C.l2 - 0.4);
+          hfArrive(tl, "#a-prev", C.l2 - 0.3, { z: -1800, rx: 14, rx2: 0 });
+          tl.to("#a-prev", { x: -380, scale: 0.9, duration: 0.9, ease: "expo.inOut" }, C.l3 - 0.45);
+          hfNote(tl, "#a-fbn", C.l3 - 0.1, 3.4);
+          ["#a-fb1", "#a-fb2", "#a-fb3"].forEach((f, i) => hfReveal(tl, f, C.l3 + 0.1 + i * 0.42));
+          // 「其实上一期里的这些动画」：评论退后，上一期回到中间、换成剖面图那一段
+          tl.to(["#a-fb1", "#a-fb2", "#a-fb3"], { opacity: 0.22, duration: 0.6, ease: "power2.out" }, C.l5 - 0.3);
+          tl.to("#a-prev", { x: -300, scale: 1.0, duration: 0.9, ease: "expo.inOut" }, C.l5 - 0.35);
+          tl.fromTo("#a-pv2", { opacity: 0 }, { opacity: 1, duration: 0.3 }, C.l5 - 0.3);
+          hfNote(tl, "#a-pnote", C.l5 + 0.6, 3.3);
+          // 「那我到底给了 AI 什么呢？」：都退下去，只留这一个问题
+          tl.to("#a-prev", { opacity: 0, filter: "blur(10px)", scale: 1.0, duration: 0.6, ease: "power2.in" }, C.l7 - 0.4);
+          tl.to(["#a-fb1", "#a-fb2", "#a-fb3"], { opacity: 0, duration: 0.5 }, C.l7 - 0.4);
+          hfChars("#a-qt");
+          hfTextIn(tl, "#a-qt", C.l7 - 0.05);
+          hfTextOut(tl, "#a-qt", C.l8 - 0.3);
+
+          // ── ③ 回到拆层图，各层合回一帧 ──
+          tl.to("#a-hook", { scale: 1, filter: "blur(0px) brightness(1)", duration: 1.0, ease: "power2.out" }, C.l8 - 0.2);
+          tl.to("#a-rig", { rotationY: -37, x: 20, duration: 3.2, ease: "sine.inOut" }, C.l8 - 0.2);
+          tl.to([".a-tag", "#a-ax"], { opacity: 0, duration: 0.4 }, C.l10 - 0.4);
+          SL.slice(1).reverse().forEach((s, k) => tl.to(s, { z: 0, duration: 0.9, ease: "expo.inOut" }, C.l10 - 0.3 + k * 0.12));
+          tl.to("#a-rig", { rotationY: 0, x: 606, y: -30, scale: 1.6, duration: 1.3, ease: "expo.inOut" }, C.l10 + 0.5);
+          // 「拍片子，先要想好拍什么」：这一帧散开，舞台上亮起一束光
+          tl.to("#a-rig", { scale: 1.9, duration: 0.7, ease: "power2.in" }, C.shoot - 0.35);
+          tl.to("#a-hook", { opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in" }, C.shoot - 0.25);
+
+          // ── ④ 微观片场 ──
+          const L = C.shoot + 0.1;
+          tl.to("#a-set .mset-light", { opacity: 1, duration: 0.9, ease: "power2.out" }, L);
+          tl.to("#a-capfade", { opacity: 1, duration: 0.9 }, L);
+          gsap.set(["#a-s-route", "#a-s-beam"], { opacity: 0 });
+          tl.to("#a-s-route", { opacity: 1, duration: 0.8 }, L + 0.4);
+          tl.to("#a-s-beam", { opacity: 0.07, duration: 1.0 }, L);
+          S.hideCells();
+          // 七个角落从 01 到 07 一个个画出来，胶带跟着
+          [0, 1, 2, 3, 4, 5, 6].forEach((i) => { S.drawCorner(i, L + 0.25 + i * 0.2, 0.8, i === 2); S.drawTape(i, L + 0.55 + i * 0.2); });
+          // 米花从左边画出来、走进来
+          S.place(S.K[0].mh[0] - 330, S.K[0].mh[1], 1.0);
+          S.drawMh(L + 0.4, 0.7);
+          S.pose(0, "mh-wave", [2, 1], "smile");
+          S.walk(S.K[0].mh[0], S.K[0].mh[1], 1.0, L + 0.9, 1.3);
+          S.blink(L + 2.3);
+          S.boil(L, C.end);
+
+          // 说到哪一章，镜头和米花就到哪个角落；别的角落退后；道具动一下
+          S.focus(cam, 0, C.topic - 0.7, 1.1);
+          S.clap(C.topic + 0.25);
+          S.K.forEach((k, i) => {
+            if (!i) return;
+            const key = ["topic", "script", "board", "sound", "style", "crew", "quota"][i], at = C[key] - 0.55;
+            S.walk(k.mh[0], k.mh[1], k.mh[2], at - 0.2, 1.0);
+            S.focus(cam, i, at, 0.95);
+            S.blink(at + 1.0);
+          });
+          S.pose(C.script - 0.2, "mh-down", [-3, -3], "smile");     // 看剧本
+          S.script(C.script + 0.25);
+          S.pose(C.board - 0.2, "mh-point", [3, -4], "smile");      // 指着分镜板
+          S.board(C.board + 0.35, 0.34);
+          S.pose(C.sound - 0.2, "mh-down", [4, 0], "oh");           // 跟着话筒哼
+          S.sound(C.sound + 0.15, 2.2);
+          S.pose(C.style - 0.2, "mh-down", [4, 1], "smile");
+          S.style(C.style + 0.2);
+          S.pose(C.crew - 0.2, "mh-down", [4, -1], "smile");
+          S.crew(C.crew, 3.2);
+          S.pose(C.budget - 0.2, "mh-down", [4, 1], "smile");
+          S.quota(C.quota + 0.1);
+
+          // 「这期，我们就按这个顺序」：拉远看整个片场，米花走到前面正中间，挥两下手，头上那颗爆米花蹦一下
+          tl.to(S.corners, { opacity: 1, duration: 0.8, ease: "power2.out" }, C.order - 0.2);
+          cam.home(tl, C.order - 0.2, 1.4);
+          S.walk(960, 806, 1.04, C.order, 1.6);
+          S.pose(C.order + 1.6, "mh-wave", [0, 1], "smile");
+          S.wave(C.order + 1.7, 2);
+          S.hop(C.tour + 0.8);
+          S.blink(C.tour + 1.6);
+          cam.breathe(tl, 960, 540, 1.0, C.order + 1.25, C.tour + 2.6, 0.02);
+          // 最后一秒：米花走回 01，镜头推过去——下一章就从这个角落开始（接得上）
+          S.pose(C.tour + 2.6, "mh-wave", [2, 1], "smile");
+          S.walk(S.K[0].mh[0], S.K[0].mh[1], 1.0, C.tour + 2.6, C.end - C.tour - 2.6);
+          tl.to(S.corners.slice(1), { opacity: 0.32, duration: 0.6, ease: "power2.out" }, C.end - 0.9);
+          cam.focus(tl, S.K[0].look[0], S.K[0].look[1], S.K[0].look[2] * 1.06, C.tour + 2.75, C.end - C.tour - 2.75, "power2.inOut");
+
+          window.__timelines["actA"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

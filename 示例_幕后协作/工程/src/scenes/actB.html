@@ -1,0 +1,236 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actB 01 选题。章节卡：01 角落（场记板），接着开场最后那个画面，不重画。
+           场记板往左让开：两张手绘小卡「大家最想知道的 / 对大家有什么用」，场记板上贴「片名 一句话故事」；右边原样摆同学评论，细线连到第一张卡；第二张连到真的导航（这期七章）
+           → 镜头推到场记板上的片名条（「片名」那一格写的就是一句话故事，「片名」反白）→ 甩上去：上一期的封面（提一个问题）+ 真实的发布标题（讲怎么解决）
+           → 落回片场：摄影机（AI）帮着想角度；最后讲什么米花自己定；同学们问的是作者接收到的，作者怎么想的 AI 不知道。 */
+        #b-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #b-card { position: absolute; inset: 0; }
+        #b-setw { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        #b-in { position: absolute; inset: 0; }
+        #b-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        /* 两件事：场记板角落往左让开、光圈收小；画在片场坐标里（随章节卡的镜头一起 2 倍），证据在右边深色处 */
+        #b-s-light { transform-origin: 349px 564px; }
+        #b-x { pointer-events: none; }
+        #b-x .lk { fill: none; stroke: rgba(14,14,15,0.9); stroke-width: 4.2; stroke-linecap: round; }
+        #b-x .lw { fill: none; stroke: #f4f4f4; stroke-width: 1.7; stroke-linecap: round; stroke-dasharray: 5 5; }
+        #b-x .ans { font-family: "PuHui", sans-serif; font-weight: 700; font-size: 8.6px; fill: #3a3a3a; }
+        #b-x .qm { font-family: "ShuHei", sans-serif; font-weight: 700; font-size: 21px; fill: #161616; }
+        #b-ev { position: absolute; left: 960px; top: 452px; width: 240px; }
+        #b-ev .tp { display: inline-block; margin-bottom: 9px; padding: 3px 8px 4px; background: #f2f2ef; box-shadow: 0 0 0 1.3px #161616; border-radius: 1px; font: 700 11px/1 "ShuHei", sans-serif; color: #161616; transform: rotate(-2deg); opacity: 0; }
+        #b-ev2 { position: absolute; left: 356px; top: 420px; width: 206px; }
+        #b-ev2 .tp { display: inline-block; margin-bottom: 7px; padding: 3px 8px 4px; background: #f2f2ef; box-shadow: 0 0 0 1.3px #161616; border-radius: 1px; font: 700 11px/1 "ShuHei", sans-serif; color: #161616; transform: rotate(-2deg); }
+        #b-ev2 .shot { margin-bottom: 6px; border-radius: 5px; box-shadow: 0 10px 24px rgba(0,0,0,0.35); }
+        #b-ev .shot { margin-bottom: 7px; border-radius: 6px; box-shadow: 0 0 0 0.6px rgba(255,255,255,0.08), 0 12px 30px rgba(0,0,0,0.45); opacity: 0; }
+        #b-navbox { left: 588px; top: 36px; width: 744px; height: 51px; }
+        /* 封面 + 标题（在画布右边，x + 1920） */
+        #b-cover { position: absolute; left: 2220px; top: 210px; width: 420px; height: 560px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.14), 0 40px 90px rgba(0,0,0,0.6); opacity: 0; }
+        #b-cover img { display: block; width: 100%; height: 100%; }
+        #b-covbox { left: 8px; top: 212px; width: 344px; height: 116px; }
+        #b-title { position: absolute; left: 2760px; top: 590px; width: 860px; padding: 26px 34px 30px; border-radius: 14px; background: #1b1b1d; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.12), 0 30px 70px rgba(0,0,0,0.5); opacity: 0; }
+        #b-title em { display: block; font: 500 20px/1 "PuHui", sans-serif; font-style: normal; letter-spacing: 0.1em; color: rgba(255,255,255,0.5); margin-bottom: 18px; }
+        #b-title b { display: block; font: 700 44px/1.25 "ShuHei", sans-serif; color: #f4f4f6; white-space: nowrap; }
+      </style>
+      <div id="b-root" data-composition-id="actB" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <svg width="0" height="0" style="position:absolute"><filter id="b-mbv" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="b-mbvg" stdDeviation="0 0" /></filter><filter id="b-mbh" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur id="b-mbhg" stdDeviation="0 0" /></filter></svg>
+        <!-- 章节卡：01 选题 -->
+        <div id="b-card"><div id="b-setw"><div class="mset" id="b-set"><!--@@INCLUDE:src/partials/set/set_actB.html@@-->
+          <!-- 两件事：两张手绘小卡 + 场记板上的片名条 + 细线（片场坐标） -->
+          <svg class="mset-svg" id="b-x" viewBox="0 0 1920 1080">
+            <path class="lk" id="b-l1k" d="M528 470 C 580 440, 890 436, 956 484" /><path class="lw" id="b-l1" d="M528 470 C 580 440, 890 436, 956 484" />
+            <path class="lk" id="b-l2k" d="M646 474 C 652 452, 690 436, 712 424" /><path class="lw" id="b-l2" d="M646 474 C 652 452, 690 436, 712 424" />
+            <g id="b-cd1" transform="translate(440 520) rotate(-4)"><g filter="url(#b-s-wob)">
+              <rect x="-82" y="-50" width="172" height="112" rx="4" fill="#000" opacity="0.13" />
+              <rect x="-86" y="-56" width="172" height="112" rx="4" class="s w" />
+              <rect x="-16" y="-63" width="34" height="13" fill="#e4e4e1" class="s th" transform="rotate(4)" />
+              <path class="s w th" d="M-58 -40 h44 q7 0 7 7 v18 q0 7 -7 7 h-26 l-9 8 v-8 h-9 q-7 0 -7 -7 v-18 q0 -7 7 -7 z" />
+            </g>
+              <text class="qm" x="-36" y="-17" text-anchor="middle">?</text>
+              <text class="tape" x="0" y="20" text-anchor="middle">大家最想知道的</text>
+              <text class="ans" id="b-an1" x="0" y="42" text-anchor="middle">这期：那些动画，我到底给了 AI 什么</text>
+            </g>
+            <g id="b-cd2" transform="translate(640 534) rotate(3)"><g filter="url(#b-s-wob)">
+              <rect x="-82" y="-50" width="172" height="112" rx="4" fill="#000" opacity="0.13" />
+              <rect x="-86" y="-56" width="172" height="112" rx="4" class="s w" />
+              <rect x="-18" y="-63" width="34" height="13" fill="#e4e4e1" class="s th" transform="rotate(-3)" />
+              <path class="s l th" d="M-54 -36 L-18 -36 L-14 -6 L-58 -6 Z" />
+              <path class="s w th" d="M-54 -36 L-49 -44 L-23 -44 L-18 -36" />
+              <path class="s n th" d="M-44 -30 q8 8 16 0" />
+              <path class="doodle" d="M-6 -36 l6 -4 M-4 -24 l8 0 M-6 -12 l6 4" />
+            </g>
+              <text class="tape" x="0" y="20" text-anchor="middle">对大家有什么用</text>
+              <text class="ans" id="b-an2" x="0" y="42" text-anchor="middle">这期：要想清楚哪几件事</text>
+            </g>
+            <g transform="translate(511 651) rotate(-4)"><g id="b-strip"><g filter="url(#b-s-wob)"><rect x="-104" y="-11" width="208" height="22" rx="1.5" class="s th w" /></g>
+              <rect id="b-pmhl" x="0" y="0" width="0" height="0" rx="2" fill="#161616" />
+              <text class="tape" x="0" y="6.5" text-anchor="middle" style="font-size:14px"><tspan class="tape-n" id="b-pm" style="font-size:14px">片名 </tspan><tspan id="b-stt">一句话故事</tspan></text></g></g>
+            <!-- 落回片场：摄影机（AI）想的几个角度、米花的想法、同学们问的、AI 不知道 -->
+            <path class="lk" id="b-l3k" d="M562 478 C 640 470, 700 520, 742 572" /><path class="lw" id="b-l3" d="M562 478 C 640 470, 700 520, 742 572" />
+            <g id="b-ok" transform="translate(632 640)"><path class="s n" d="M-8 0 l7 8 l14 -18" style="stroke-width:4" /></g>
+            <g id="b-ang"><g transform="translate(1040 500)">
+              <g filter="url(#b-s-wob)"><rect x="-44" y="-28" width="56" height="42" rx="3" class="s w th" transform="rotate(-6 -16 -7)" /><rect x="8" y="-34" width="56" height="42" rx="3" class="s w th" transform="rotate(4 36 -13)" /><rect x="-102" y="-30" width="56" height="42" rx="3" class="s w th" transform="rotate(-3 -74 -9)" /></g>
+              <path class="doodle" d="M-96 2 l12 -16 l8 9 l9 -12 l14 19" /><circle class="doodle" cx="-60" cy="-20" r="4" />
+              <circle class="doodle" cx="-16" cy="-10" r="11" /><path class="doodle" d="M-21 -13 v2 M-11 -13 v2 M-21 -4 q5 4 10 0" />
+              <circle class="doodle" cx="36" cy="-13" r="12" /><path class="doodle" d="M24 -13 h24 M36 -25 v24" />
+              <g transform="translate(-20 -52) rotate(-2)"><g filter="url(#b-s-wob)"><rect x="-24" y="-11" width="48" height="22" rx="2" class="s th w" /></g><text class="tape" x="0" y="6" text-anchor="middle" style="font-size:13px">角度</text></g>
+            </g></g>
+            <g id="b-qb" transform="translate(930 560)"><g filter="url(#b-s-wob)"><path class="s w th" d="M-22 -20 h36 q7 0 7 7 v14 q0 7 -7 7 h-12 l-4 8 l-6 -8 h-14 q-7 0 -7 -7 v-14 q0 -7 7 -7 z" /></g><text class="qm" x="-4" y="1" text-anchor="middle" style="font-size:19px">?</text></g>
+            <g id="b-th" transform="translate(728 470)"><g filter="url(#b-s-wob)">
+              <path class="s w" d="M-118 10 C-130 -14 -104 -36 -82 -28 C-74 -52 -36 -54 -20 -40 C-6 -60 34 -58 46 -38 C70 -50 104 -34 98 -10 C122 -2 118 30 92 32 C88 54 50 58 34 44 C16 62 -26 60 -38 42 C-62 56 -100 46 -98 26 C-122 26 -126 14 -118 10 Z" />
+              <circle cx="40" cy="70" r="7" class="s w th" /><circle cx="56" cy="88" r="4.5" class="s w th" />
+            </g>
+              <text class="ans" x="0" y="-14" text-anchor="middle" style="font-size:9px">我是怎么想的</text>
+              <text class="tape" x="0" y="8" text-anchor="middle" style="font-size:12px">选题 · 口播 · 分镜 · 声音</text>
+              <text class="tape" x="0" y="27" text-anchor="middle" style="font-size:12px">风格 · 协作 · 省额度</text>
+            </g>
+          </svg>
+          <div id="b-ev2"><span class="tp">同学们问的</span><div class="shot"><img src="assets/img/fb1.png" alt="" /></div><div class="shot"><img src="assets/img/fb3.png" alt="" /></div></div>
+          <div id="b-ev"><span class="tp">同学们问的</span>
+            <div class="shot" id="b-fb1"><img src="assets/img/fb1.png" alt="" /></div><div class="shot" id="b-fb2"><img src="assets/img/fb2.png" alt="" /></div><div class="shot" id="b-fb3"><img src="assets/img/fb3.png" alt="" /></div></div>
+        </div></div><div class="mset-capfade"></div></div>
+
+        <div id="b-in"><div id="b-w">
+          <!-- 上一期：封面提问题，标题给答案 -->
+          <div id="b-cover"><img src="assets/img/prev_cover34.png" alt="" /><div class="outline" id="b-covbox"></div></div>
+          <div class="note" id="b-covn"><span class="dot"></span><span class="ln"></span><span class="t">上一期的封面<small>提一个问题</small></span></div>
+          <div id="b-title"><em>上一期 · 发布标题</em><b><span class="fitw" id="b-ttext">一份设计稿如何让AI落到4套组件库？<span class="outline fit sm" id="b-tbox"></span></span></b></div>
+          <div class="note" id="b-tn"><span class="dot"></span><span class="ln"></span><span class="t">标题<small>讲怎么解决</small></span></div>
+
+        </div></div>
+        <!-- 这期的七章就在画面顶上：直接框住真的导航 -->
+        <div class="outline" id="b-navbox"></div>
+        <div class="note" id="b-navn"><span class="dot"></span><span class="ln"></span><span class="t">这期的七章</span></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/kit.js@@-->
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          kPinTimeline(tl, C.end);
+          // 章节卡：接着开场最后那个画面（同一个角落、同一个镜头），所以不重画
+          const scam = hfCam("#b-setw");
+          const S = hfCard("b-s-", tl, scam, 0, { draw: null, prop: C.l1 - 0.35, hold: C.l3 });
+
+          // ── 两件事：场记板往左让开，光圈收小，别的角落退掉 ──
+          const R = C.l3 - 0.55;
+          tl.to(S.corners.slice(1), { opacity: 0, duration: 0.6 }, R);
+          tl.to(["#b-s-route", "#b-s-beam", "#b-s-tapes"], { opacity: 0, duration: 0.5 }, R);
+          tl.to("#b-s-light", { scale: 0.38, x: 0, y: 40, duration: 1.1, ease: "power2.inOut" }, R);
+          scam.focus(tl, 760, 650, 2.0, R, 1.1);
+          S.clapTo(0, R + 0.2, 0.35);
+          S.walk(806, 784, 1.0, R + 0.1, 1.0);
+          S.pose(R + 1.1, "mh-point", [-4, -5], "smile");
+          S.blink(R + 1.4);
+          S.boil(C.l3, C.end);
+          gsap.set(["#b-cd1", "#b-cd2", "#b-strip", "#b-stt", "#b-an1", "#b-an2", "#b-ang", "#b-qb", "#b-th", "#b-ok", "#b-ev2"], { opacity: 0 });
+          // 大家最想知道的 / 对大家有什么用：两张小卡贴上来（线条一笔笔画出来）
+          [["#b-cd1", C.l4 - 0.3], ["#b-cd2", C.l5 - 0.3]].forEach(([g, t]) => {
+            tl.set(g, { opacity: 1 }, t);
+            S.drawEls([...document.querySelectorAll(g + " > g rect, " + g + " > g path")], t, 0.55);
+            tl.fromTo(document.querySelectorAll(g + " > text:not(.ans)"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, t + 0.35);
+          });
+          // 「最好一句话就能说清楚」：场记板上贴一条片名条；「一句话故事」写上去
+          tl.to("#b-strip", { opacity: 1, duration: 0.45, ease: "power2.out" }, C.l6 + 0.3);
+          tl.to("#b-stt", { opacity: 1, duration: 0.5 }, C.l7 + 0.6);
+          // 比如这期：同学们问的（原样）→ 细线连到第一张卡 → 卡上写这期的答案
+          tl.to("#b-ev .tp", { opacity: 1, duration: 0.35 }, C.l9 - 0.25);
+          ["#b-fb1", "#b-fb2", "#b-fb3"].forEach((f, i) => hfReveal(tl, f, C.l9 + i * 0.25, { y: 10, blur: 6 }));
+          const dash = (k, w, t) => { const L = document.getElementById(k).getTotalLength(); gsap.set(["#" + k, "#" + w], { strokeDashoffset: L, strokeDasharray: L + " " + L, opacity: 0 });
+            tl.set(["#" + k, "#" + w], { opacity: 1 }, t);   // 画之前整条藏起来：圆角线头会先冒出一个小点
+            tl.to("#" + k, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, t);
+            tl.to("#" + w, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, t); tl.set("#" + w, { strokeDasharray: "5 5", strokeDashoffset: 0 }, t + 0.72); };
+          dash("b-l1k", "b-l1", C.l10 - 0.5);
+          tl.to("#b-an1", { opacity: 1, duration: 0.45 }, C.l10 + 0.1);
+          // 看完大家就知道：这期的七章——画面顶上真的导航
+          tl.to("#b-ev", { opacity: 0.55, duration: 0.5 }, C.l11 - 0.2);
+          tl.to("#b-an2", { opacity: 1, duration: 0.45 }, C.l12 - 0.1);
+          dash("b-l2k", "b-l2", C.l12 + 0.2);
+          hfOutline(tl, "#b-navbox", C.l12 + 0.6, 2.4);
+          pinAt("#b-navn", 1332, 61.5, false);
+          hfNote(tl, "#b-navn", C.l12 + 0.9, 2.1);
+
+          // 「这句话想清楚了，标题基本也就有了」：镜头推到场记板上那条片名条——「片名」那一格写的就是这句话；「片名」反白
+          scam.focus(tl, 511, 640, 3.4, C.l13 - 0.3, 1.0);
+          tl.to(["#b-ev", "#b-l1k", "#b-l1", "#b-l2k", "#b-l2"], { opacity: 0.25, duration: 0.5 }, C.l13 - 0.3);
+          const pm = document.getElementById("b-pm"), pmhl = document.getElementById("b-pmhl");
+          kLive(tl, pm, () => { const b = pm.getBBox(); pmhl.setAttribute("x", b.x - 4); pmhl.setAttribute("y", b.y - 1); pmhl.setAttribute("width", b.width - 1); pmhl.setAttribute("height", b.height + 2); }, C.end);
+          gsap.set(pmhl, { scaleX: 0, transformOrigin: "0% 50%", transformBox: "fill-box" });
+          tl.to(pmhl, { scaleX: 1, duration: 0.35, ease: "power2.out" }, C.l13 + 0.9);
+          tl.to(pm, { fill: "#f7f7f5", duration: 0.2 }, C.l13 + 1.0);
+
+          // ── 甩上去：上一期的封面（提一个问题）和真实的发布标题（讲怎么解决）──
+          const out = C.l14 - 0.45;
+          tl.to("#b-card", { y: -1300, duration: 0.6, ease: "power3.in" }, out);
+          hfMotionBlur(tl, "#b-card", document.getElementById("b-mbvg"), "y", out, 0.6, 40);
+          tl.set("#b-card", { opacity: 0 }, out + 0.62);
+          gsap.set("#b-in", { y: 900 });
+          tl.to("#b-in", { y: 0, duration: 0.75, ease: "power3.out" }, out + 0.35);
+          const cam = hfCam("#b-w");
+          cam.set(1, -1920, 0);
+          hfArrive(tl, "#b-cover", C.l14 + 0.05, { z: -1600, rx: 12 });
+          pin("#b-covn", "#b-cover", "r", { at: 0.47 });
+          hfNote(tl, "#b-covn", C.l14 + 0.6, 2.4);
+          hfArrive(tl, "#b-title", C.l15 - 0.2, { z: -1400, rx: 10 });
+          // 「为什么 Design.md 不够用」：推到封面那句问题
+          cam.focus(tl, 2400, 480, 1.45, C.l16 - 0.3, 1.0);
+          hfOutline(tl, "#b-covbox", C.l17 - 0.1, 2.3);
+          // 「标题写的就是 / 一份设计稿如何让AI落到4套组件库？」
+          cam.focus(tl, 3190, 650, 1.45, C.l18 - 0.4, 1.0);
+          hfOutline(tl, "#b-tbox", C.l19 + 0.1, 2.2);
+          pin("#b-tn", "#b-title", "b", { at: 0.12 });
+          hfNote(tl, "#b-tn", C.l19 + 0.4, 2.2);
+          cam.focus(tl, 2880, 540, 1.0, C.l19e + 0.1, 1.1);
+
+          // ── 落回片场：摄影机（AI）帮着想角度，最后讲什么米花自己定 ──
+          const back = C.l20 - 0.5;
+          tl.to("#b-in", { y: 1300, duration: 0.6, ease: "power3.in" }, back);
+          hfMotionBlur(tl, "#b-in", document.getElementById("b-mbvg"), "y", back, 0.6, 40);
+          tl.set("#b-card", { opacity: 1 }, back);
+          tl.to("#b-card", { y: 0, duration: 0.75, ease: "power3.out" }, back + 0.3);
+          tl.set(["#b-cd1", "#b-cd2", "#b-ev", "#b-l1k", "#b-l1", "#b-l2k", "#b-l2"], { opacity: 0 }, back + 0.3);
+          // 摄影机（06 角落里的那台）挪到米花右边；导演椅不要
+          const c6 = document.getElementById("b-s-c6"), m6 = { x: 1470, y: 522 };
+          const ap6 = () => c6.setAttribute("transform", "translate(" + m6.x + " " + m6.y + ") scale(0.92)");
+          tl.set(["#b-s-chair", "#b-s-chairsign"], { opacity: 0 }, back);
+          tl.to(m6, { x: 950, y: 790, duration: 0.01, onUpdate: ap6 }, back + 0.3);
+          tl.set(c6, { opacity: 1 }, back + 0.3);
+          tl.to("#b-s-light", { scale: 0.48, x: 122, y: 49, duration: 0.01 }, back + 0.3);
+          scam.focus(tl, 800, 620, 1.8, back + 0.3, 0.01);
+          S.walk(752, 784, 1.0, back + 0.3, 0.01);
+          S.pose(back + 0.3, "mh-down", [4, 0], "smile");
+          S.crew(C.l20, 3.0);
+          tl.to("#b-qb", { opacity: 0, duration: 0.01 }, back);
+          // 「让它帮我想想角度」：几个角度从摄影机那边冒出来
+          tl.fromTo("#b-ang", { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, C.l21 - 0.1);
+          // 「但最后讲什么 / 还是要我自己来定」：角度退后，米花指着场记板上的片名，打个勾
+          tl.to("#b-ang", { opacity: 0.35, duration: 0.5 }, C.l22 - 0.1);
+          S.pose(C.l22 - 0.1, "mh-point", [-4, -3], "smile");
+          tl.set("#b-ok", { opacity: 1 }, C.l23);
+          S.drawEls([...document.querySelectorAll("#b-ok path")], C.l23, 0.4);
+          // 「同学们在问什么，是我接收到的」：作者收到的问题（原样）连到米花
+          tl.fromTo("#b-ev2", { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, C.l24 - 0.1);
+          dash("b-l3k", "b-l3", C.l24 + 0.4);
+          // 「我是怎么想的，AI 也不知道」：米花头上的想法（这期七章），摄影机那边一个问号
+          tl.set("#b-th", { opacity: 1 }, C.l25 - 0.1);
+          S.drawEls([...document.querySelectorAll("#b-th path, #b-th circle")], C.l25 - 0.1, 0.6);
+          tl.fromTo("#b-th text", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l25 + 0.4);
+          S.pose(C.l25, "mh-wave", [-2, -4], "smile");
+          tl.to("#b-qb", { opacity: 1, duration: 0.35, ease: "power2.out" }, C.l25 + 0.9);
+          S.blink(C.l25 + 1.3);
+          scam.breathe(tl, 800, 620, 1.8, C.l20 + 0.4, C.end - 0.6, 0.025);
+          tl.to("#b-card", { opacity: 0, filter: "blur(12px)", duration: 0.55, ease: "power2.in" }, C.end - 0.6);
+          window.__timelines["actB"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

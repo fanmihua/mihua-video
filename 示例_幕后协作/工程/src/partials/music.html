@@ -1,0 +1,11 @@
+<pre><span class="n">2</span><span class="s">&quot;&quot;</span>&quot;「幕后协作」v2 的配乐：跟着口播走。原创合成，只用 numpy，无版权问题。
+<span class="n">3</span>
+<span class="n">4</span>    python3 music/music_follow.py [--config video.config.json] [--out assets/music/bed.wav]
+<span class="n">5</span>
+<span class="n">6</span>要在换配音、build（有了 timing/acts.generated.json）之后跑，替代 tools/make_music.py；跑完照常 tools/mix.py。
+<span class="n">7</span>和 skill 的 make_music.py 同一套乐器（暖 pad、电钢琴、低音、轻底鼓），区别在怎么变化：
+<span class="n">8</span>  · 说话时只有和弦、低音和很轻的底鼓，没有一直走的琶音；
+<span class="n">9</span>  · 换话题的停顿（≥0.9 秒，从 timing/film.json 读）钢琴接一小句，停多久弹几个音；
+<span class="n">10</span>  · 每章换一组和弦、换调，换章前轻轻渐起、新章第一拍一声铃；开场和结尾用以前那组和弦（首尾呼应）；
+<span class="n">11</span>  · config 的 lifts（三处高光）琶音进来、多一层；结尾落在 Cmaj9。
+<span class="n">12</span>声音章「配乐跟着口播走」那段的演示（按字幕文字找时间，稿子改了行号也不怕）：</pre>

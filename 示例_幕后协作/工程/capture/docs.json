@@ -1,0 +1,166 @@
+{
+ "doc_fish_clone": {
+  "url_not_shown": "https://docs.fish.audio/features/voice-cloning",
+  "viewport": {
+   "width": 1280,
+   "height": 800,
+   "dpr": 2.5
+  },
+  "quotes": {
+   "Clone your own voice": {
+    "x": 660.4,
+    "y": 280,
+    "w": 162.2,
+    "h": 20.4,
+    "lines": [
+     {
+      "x": 660.4,
+      "y": 280,
+      "w": 162.2,
+      "h": 20.4
+     }
+    ]
+   },
+   "a minute or two of clear speech": {
+    "x": 544.5,
+    "y": 1593.6,
+    "w": 236.2,
+    "h": 20.4,
+    "lines": [
+     {
+      "x": 544.5,
+      "y": 1593.6,
+      "w": 236.2,
+      "h": 20.4
+     }
+    ]
+   }
+  }
+ },
+ "doc_cc_overview": {
+  "url_not_shown": "https://code.claude.com/docs/en/overview",
+  "viewport": {
+   "width": 1280,
+   "height": 800,
+   "dpr": 2.5
+  },
+  "quotes": {
+   "agentic coding tool": {
+    "x": 501.6,
+    "y": 235.2,
+    "w": 142.5,
+    "h": 20,
+    "lines": [
+     {
+      "x": 501.6,
+      "y": 235.2,
+      "w": 142.5,
+      "h": 20
+     }
+    ]
+   }
+  }
+ },
+ "doc_hf_intro": {
+  "url_not_shown": "https://hyperframes.heygen.com/introduction",
+  "viewport": {
+   "width": 1280,
+   "height": 800,
+   "dpr": 2.5
+  },
+  "quotes": {
+   "turns HTML into video": {
+    "x": 396,
+    "y": 279.9,
+    "w": 460,
+    "h": 48.4,
+    "lines": [
+     {
+      "x": 739.4,
+      "y": 279.9,
+      "w": 116.6,
+      "h": 20.4
+     },
+     {
+      "x": 396,
+      "y": 307.9,
+      "w": 39.6,
+      "h": 20.4
+     }
+    ]
+   }
+  }
+ },
+ "doc_cc_costs": {
+  "url_not_shown": "https://code.claude.com/docs/en/costs",
+  "viewport": {
+   "width": 1280,
+   "height": 800,
+   "dpr": 2.5
+  },
+  "quotes": {
+   "token consumption": {
+    "x": 576.9,
+    "y": 280,
+    "w": 145.2,
+    "h": 20,
+    "lines": [
+     {
+      "x": 576.9,
+      "y": 280,
+      "w": 145.2,
+      "h": 20
+     }
+    ]
+   }
+  }
+ },
+ "doc_cc_context": {
+  "url_not_shown": "https://code.claude.com/docs/en/costs",
+  "viewport": {
+   "width": 1280,
+   "height": 800,
+   "dpr": 2.5
+  },
+  "quotes": {
+   "Token costs scale with context size": {
+    "x": 363.2,
+    "y": 319.8,
+    "w": 261.8,
+    "h": 20,
+    "lines": [
+     {
+      "x": 363.2,
+      "y": 319.8,
+      "w": 261.8,
+      "h": 20
+     }
+    ]
+   }
+  }
+ },
+ "doc_skills": {
+  "url_not_shown": "https://code.claude.com/docs/en/skills",
+  "viewport": {
+   "width": 1280,
+   "height": 800,
+   "dpr": 2.5
+  },
+  "quotes": {
+   "Skills extend what Claude can do": {
+    "x": 363.2,
+    "y": 280,
+    "w": 245.8,
+    "h": 20,
+    "lines": [
+     {
+      "x": 363.2,
+      "y": 280,
+      "w": 245.8,
+      "h": 20
+     }
+    ]
+   }
+  }
+ }
+}

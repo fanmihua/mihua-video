@@ -1,0 +1,76 @@
+{
+ "id": "sk_tardi_prompt",
+ "anchor": 146.65,
+ "span": 5,
+ "viewport": {
+  "width": 1152,
+  "height": 720,
+  "dpr": 2.5
+ },
+ "crop_top_css": 135,
+ "frames": 162,
+ "steps": [
+  {
+   "t": 0.13,
+   "do": "measure",
+   "rects": {
+    "Prompt": {
+     "x": 84.8,
+     "y": 215.9,
+     "w": 59.5,
+     "h": 21.2,
+     "lines": [
+      {
+       "x": 84.8,
+       "y": 215.9,
+       "w": 59.5,
+       "h": 21.2
+      }
+     ]
+    },
+    "The author shared part": {
+     "x": 56.8,
+     "y": 255.5,
+     "w": 129.9,
+     "h": 14,
+     "lines": [
+      {
+       "x": 56.8,
+       "y": 255.5,
+       "w": 129.9,
+       "h": 14
+      }
+     ]
+    },
+    "Amazing that this is possible now.": {
+     "x": 72.8,
+     "y": 307.1,
+     "w": 266.1,
+     "h": 15.2,
+     "lines": [
+      {
+       "x": 72.8,
+       "y": 307.1,
+       "w": 266.1,
+       "h": 15.2
+      }
+     ]
+    },
+    "remotion, runway and veo to make this by itself": {
+     "x": 72.8,
+     "y": 331.1,
+     "w": 367.9,
+     "h": 15.2,
+     "lines": [
+      {
+       "x": 72.8,
+       "y": 331.1,
+       "w": 367.9,
+       "h": 15.2
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

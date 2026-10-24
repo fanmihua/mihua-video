@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actC 02 口播（做法：概念画成片场小场景，真东西放真东西，细线串起来）。
+           章节卡：02 角落（剧本翻页、箱子念稿）→ 角落往左让开，三张手绘小卡：一件事的经过 / 分成几块 / 边做边演示（这期是第二种）
+           → 甩上去：这一期每章的实际时长画成一条胶片，开场那格挂个鱼钩（钩子），中间一章一件事，结尾绕回开头
+           → 看得见的：上一期颜色那一段 → 这份口播稿真文件，停顿那一行就是气口 → 时钟：这一段配音的真实波形，每句话落在第几秒（时间轴），film.json 里写着；稿子 → 配音 → 画面。 */
+        #c-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #c-card, #c-setw, #c-in { position: absolute; inset: 0; }
+        #c-setw { transform-origin: 50% 50%; }
+        #c-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        #c-s-light { transform-origin: 0 0; }
+        #c-x { pointer-events: none; }
+        #c-x .lab { font-family: "ShuHei", sans-serif; font-weight: 700; font-size: 16px; fill: #161616; }
+        /* 胶片：这一期每章的实际时长（画布 x + 1920） */
+        #c-film { position: absolute; left: 2100px; top: 470px; width: 1560px; height: 120px; overflow: visible; }
+        #c-film .rail { fill: none; stroke: rgba(255,255,255,0.8); stroke-width: 2; }
+        #c-film .hole { fill: none; stroke: rgba(255,255,255,0.45); stroke-width: 1.5; }
+        #c-film .seg { fill: #f2f2f2; opacity: 0; }
+        #c-film .cut { stroke: rgba(255,255,255,0.8); stroke-width: 2; }
+        #c-film .lb { font-family: "PuHui", sans-serif; font-weight: 700; font-size: 18px; fill: rgba(255,255,255,0.72); }
+        #c-film .hook, #c-film .arc { fill: none; stroke: #f4f4f4; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+        #c-film .arc { stroke-dasharray: 7 7; stroke-width: 2.2; }
+        #c-barcap { position: absolute; left: 2100px; top: 360px; white-space: nowrap; font: 500 22px/1 "PuHui", sans-serif; letter-spacing: 0.08em; color: rgba(255,255,255,0.5); }
+        /* 看得见的 → 概念（画布 x + 3840） */
+        #c-steps { position: absolute; left: 4200px; top: 186px; width: 1200px; display: flex; justify-content: center; align-items: center; gap: 24px; }
+        .c-step { opacity: 0; }
+        #c-sarr { position: relative; width: 160px; height: 2px; background: rgba(255,255,255,0.7); transform-origin: 0 50%; }
+        #c-sarr::after { content: ""; position: absolute; right: -2px; top: -6px; border-left: 12px solid rgba(255,255,255,0.8); border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+        #c-prev { left: 4200px; top: 300px; width: 1200px; height: 634px; opacity: 0; }
+        /* 这份稿子（画布 x + 3840，y + 1080） */
+        #c-scw { position: absolute; left: 4300px; top: 1230px; width: 760px; height: 420px; transform: scale(1.32); transform-origin: 0 0; }
+        #c-script { position: absolute; left: 0; top: 0; width: 760px; opacity: 0; }
+        .c-hl { opacity: 0; }
+        /* 时钟：真实波形 + 每句话的位置（画布 x + 1920，y + 1080） */
+        #c-clock { position: absolute; left: 2090px; top: 1230px; width: 1580px; height: 330px; border-radius: 16px; background: #18181a; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.1), 0 40px 90px rgba(0,0,0,0.55); opacity: 0; }
+        #c-clock .tt { position: absolute; left: 40px; top: 26px; font: 700 22px/1 "PuHui", sans-serif; color: #f2f2f4; }
+        #c-clock .tt small { font-weight: 500; font-size: 17px; color: #8d8d93; margin-left: 10px; }
+        #c-lines { position: absolute; left: 40px; top: 74px; width: 1500px; height: 44px; }
+        .c-ln { position: absolute; top: 0; height: 44px; padding: 0 10px; border-radius: 7px; background: #2a2a2e; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1); font: 500 14px/44px "PuHui", sans-serif; color: #d8d8dc; white-space: nowrap; overflow: hidden; opacity: 0.35; }
+        #c-wave { position: absolute; left: 40px; top: 140px; width: 1500px; height: 150px; }
+        #c-wave svg { width: 100%; height: 100%; display: block; }
+        #c-wave path { fill: rgba(255,255,255,0.78); }
+        #c-head { position: absolute; left: 40px; top: 66px; width: 2px; height: 236px; background: #f4f4f4; box-shadow: 0 0 12px rgba(255,255,255,0.6); }
+        #c-fj { position: absolute; left: 2400px; top: 1640px; width: 640px; opacity: 0; }
+        #c-filmhl { top: 180.25px; height: 46.5px; }
+        #c-order { position: absolute; left: 2330px; top: 1830px; display: flex; align-items: center; gap: 22px; }
+        #c-order .chip { font-size: 32px; padding: 16px 24px; opacity: 0; }
+        .c-oa { width: 80px; height: 2px; background: rgba(255,255,255,0.7); transform-origin: 0 50%; position: relative; }
+        .c-oa::after { content: ""; position: absolute; right: -2px; top: -6px; border-left: 12px solid rgba(255,255,255,0.8); border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+      </style>
+      <div id="c-root" data-composition-id="actC" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <svg width="0" height="0" style="position:absolute"><filter id="c-mbh" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur id="c-mbhg" stdDeviation="0 0" /></filter><filter id="c-mbv" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="c-mbvg" stdDeviation="0 0" /></filter></svg>
+        <div id="c-card"><div id="c-setw"><div class="mset" id="c-set"><!--@@INCLUDE:src/partials/set/set_actC.html@@-->
+          <!-- 三种讲法：三张手绘小卡（片场坐标） -->
+          <svg class="mset-svg" id="c-x" viewBox="0 0 1920 1080">
+            <g id="c-k1" transform="translate(700 352) rotate(-3)"><g filter="url(#c-s-wob)">
+              <rect x="-71" y="-50" width="150" height="112" rx="4" fill="#000" opacity="0.13" /><rect x="-75" y="-56" width="150" height="112" rx="4" class="s w" />
+              <rect x="-17" y="-63" width="34" height="13" fill="#e4e4e1" class="s th" transform="rotate(4)" />
+              <path class="doodle" d="M-54 -10 C -38 -34, -18 6, 2 -14 S 34 -34, 48 -18" style="stroke-width:2.6" />
+              <circle cx="-54" cy="-10" r="4.5" class="s w th" /><circle cx="2" cy="-14" r="4.5" class="s w th" /><path class="s n th" d="M48 -18 v-24 l15 6 l-15 6" />
+            </g><text class="lab" x="0" y="34" text-anchor="middle">一件事的经过</text></g>
+            <g id="c-k2" transform="translate(866 344) rotate(2)"><g filter="url(#c-s-wob)">
+              <rect x="-71" y="-50" width="150" height="112" rx="4" fill="#000" opacity="0.13" /><rect x="-75" y="-56" width="150" height="112" rx="4" class="s w" />
+              <rect x="-17" y="-63" width="34" height="13" fill="#e4e4e1" class="s th" transform="rotate(-3)" />
+              <rect x="-52" y="-40" width="30" height="34" rx="3" class="s l th" /><rect x="-15" y="-40" width="30" height="34" rx="3" class="s w th" /><rect x="22" y="-40" width="30" height="34" rx="3" class="s m th" />
+              <path class="s n th" d="M-44 -24 h14 M-7 -24 h14 M30 -24 h14" />
+            </g><text class="lab" x="0" y="34" text-anchor="middle">分成几块</text>
+              <g id="c-this" transform="translate(54 -58) rotate(8)"><g filter="url(#c-s-wob)"><rect x="-22" y="-11" width="44" height="22" rx="2" class="s th" fill="#161616" /></g><text x="0" y="6" text-anchor="middle" style="font: 700 13px ShuHei, sans-serif; fill: #f7f7f5">这期</text></g></g>
+            <g id="c-k3" transform="translate(1032 354) rotate(-2)"><g filter="url(#c-s-wob)">
+              <rect x="-71" y="-50" width="150" height="112" rx="4" fill="#000" opacity="0.13" /><rect x="-75" y="-56" width="150" height="112" rx="4" class="s w" />
+              <rect x="-17" y="-63" width="34" height="13" fill="#e4e4e1" class="s th" transform="rotate(3)" />
+              <path class="doodle" d="M-52 -6 c 10 -20, 20 10, 30 -8 s 18 -14, 26 2" style="stroke-width:2.6" />
+              <g transform="translate(10 -12) rotate(-38)"><rect x="-4" y="-40" width="10" height="34" rx="2" class="s w th" /><path d="M-4 -6 L1 6 L6 -6 Z" class="s l th" /><rect x="-4" y="-46" width="10" height="7" rx="2" class="s m th" /></g>
+            </g><text class="lab" x="0" y="34" text-anchor="middle">边做边演示</text></g>
+          </svg>
+        </div></div><div class="mset-capfade"></div></div>
+
+        <div id="c-in"><div id="c-w">
+          <!-- 结构：这一期每章的实际时长（胶片） -->
+          <div id="c-barcap">这一期 · 每一章的实际时长</div>
+          <svg id="c-film" viewBox="0 0 1560 120"></svg>
+          <div class="note" id="c-hookn"><span class="dot"></span><span class="ln"></span><span class="t">钩子<small>开头先抛一个问题</small></span></div>
+
+          <!-- 看得见的 → 概念：上一期 -->
+          <div id="c-steps"><div class="c-step" id="c-s1"><span class="chip">看得见的</span></div><div id="c-sarr"></div><div class="c-step" id="c-s2"><span class="chip">背后的概念</span></div></div>
+          <div class="win" id="c-prev"><div class="bar"><i></i><i></i><i></i><b>上一期 · 同一个主色，在四个组件库里</b></div>
+            <div class="body nocap"><img src="assets/img/prev_color_end.jpg" alt="" /><video id="c-pv" src="assets/video/prev_color.mp4" muted playsinline data-start="@@C.l13-0.4@@" data-duration="@@Math.min(C.l17-(C.l13-0.4), 7.0-Math.max(0, 3.06-(C.l15-(C.l13-0.4))))@@" data-media-start="@@Math.max(0, 3.06-(C.l15-(C.l13-0.4)))@@"></video></div></div>
+
+          <!-- 这份口播稿：像平时说话，换话题留个气口 -->
+          <div id="c-scw"><div class="code doc" id="c-script"><div class="tab say"><span class="s">这期的口播稿</span><b>script.md</b></div><!--@@INCLUDE:src/partials/script-c.html@@-->
+            <div class="hl c-hl" id="c-h8" style="top:226.75px"></div><div class="hl c-hl" id="c-h9" style="top:250px"></div>
+            <div class="hl c-hl" id="c-h10" style="top:273.25px"></div><div class="hl c-hl" id="c-h11" style="top:296.5px"></div><div class="hl c-hl" id="c-h12" style="top:319.75px"></div></div></div>
+          <div class="note" id="c-gapn"><span class="dot"></span><span class="ln"></span><span class="t">气口<small>停一下</small></span></div>
+
+          <!-- 时钟：这一段配音，每一句说在第几秒，排成一条时间轴 -->
+          <div id="c-clock"><div class="tt">这一段配音<small>每一句是在第几秒说的</small></div>
+            <div id="c-lines">
+              <div class="c-ln" data-l="l21">还有一点，稿子其实是整支片子的时钟</div><div class="c-ln" data-l="l22">配音合成好以后，AI 会再听一遍</div>
+              <div class="c-ln" data-l="l23">记下每一句，是在第几秒说的</div><div class="c-ln" data-l="l24">排成一条时间轴</div>
+              <div class="c-ln" data-l="l25">画面什么时候动，都跟着它走</div><div class="c-ln" data-l="l26">所以我都是先把稿子定了</div><div class="c-ln" data-l="l27">再去配音、做画面</div>
+            </div>
+            <div id="c-wave"><!--@@INCLUDE:src/partials/wave/wave_c.html@@--></div>
+            <div id="c-head"></div>
+          </div>
+          <div class="note" id="c-tln"><span class="dot"></span><span class="ln"></span><span class="t">时间轴</span></div>
+          <div class="code" id="c-fj"><div class="tab say"><span class="s">这一句从第几秒到第几秒</span><b>timing/film.json</b></div><!--@@INCLUDE:src/partials/film-c.html@@--><div class="hl" id="c-filmhl"></div></div>
+          <div id="c-order"><span class="chip" id="c-o1">稿子</span><div class="c-oa" id="c-oa1"></div><span class="chip" id="c-o2">配音</span><div class="c-oa" id="c-oa2"></div><span class="chip" id="c-o3">画面</span></div>
+        </div></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/kit.js@@-->
+        <!--@@INCLUDE:src/partials/acts_dur.js@@-->
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          kPinTimeline(tl, C.end);
+          // 章节卡：02 口播（剧本翻一页，箱子跟着念）
+          const scam = hfCam("#c-setw");
+          const S = hfCard("c-s-", tl, scam, 1, { prop: C.l1 - 0.2, hold: C.l2 + 0.6 });
+
+          // ── 三种讲法：角落往左让开，光圈收小，三张小卡贴上来 ──
+          const R = C.l2 + 0.4;
+          tl.to(S.corners.filter((_, j) => j !== 1), { opacity: 0, duration: 0.6 }, R);
+          tl.to(["#c-s-route", "#c-s-beam", "#c-s-tapes"], { opacity: 0, duration: 0.5 }, R);
+          tl.to("#c-s-light", { scale: 0.42, x: 340, y: 230, duration: 1.1, ease: "power2.inOut" }, R);
+          scam.focus(tl, 760, 450, 1.9, R, 1.1);
+          S.walk(560, 560, 0.92, R + 0.1, 0.9);
+          S.boil(C.l2, C.l7);
+          gsap.set(["#c-k1", "#c-k2", "#c-k3", "#c-this"], { opacity: 0 });
+          [["#c-k1", C.l3 - 0.3], ["#c-k2", C.l4 - 0.3], ["#c-k3", C.l5 - 0.3]].forEach(([g, t]) => {
+            tl.set(g, { opacity: 1 }, t);
+            S.drawEls([...document.querySelectorAll(g + " > g path, " + g + " > g rect, " + g + " > g circle")], t, 0.55);
+            tl.fromTo(document.querySelectorAll(g + " > text"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, t + 0.35);
+          });
+          // 「这期用的，就是第二种」
+          tl.to(["#c-k1", "#c-k3"], { opacity: 0.35, duration: 0.5 }, C.l6 - 0.1);
+          tl.to("#c-this", { opacity: 1, duration: 0.35 }, C.l6 + 0.2);
+          S.pose(C.l6, "mh-point", [4, -4], "smile");
+
+          // ── 甩上去：结构 ──
+          const out = C.l7 - 0.45;
+          tl.to("#c-card", { y: -1300, duration: 0.6, ease: "power3.in" }, out);
+          hfMotionBlur(tl, "#c-card", document.getElementById("c-mbvg"), "y", out, 0.6, 40);
+          tl.set("#c-card", { opacity: 0 }, out + 0.62);
+          gsap.set("#c-in", { y: 900 });
+          tl.to("#c-in", { y: 0, duration: 0.75, ease: "power3.out" }, out + 0.35);
+          const cam = hfCam("#c-w");
+          cam.set(1, -1920, 0);
+
+          // 胶片：每格宽度 = 这一章的实际时长（ACTS_DUR，build 算出来的）
+          const NS = "http://www.w3.org/2000/svg", film = document.getElementById("c-film");
+          const mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); film.appendChild(e); return e; };
+          const groups = [["开场", ["actA"]], ["01 选题", ["actB"]], ["02 口播", ["actC"]], ["03 分镜", ["actD"]], ["04 声音", ["actE"]], ["05 风格", ["actF"]], ["06 协作", ["actG"]], ["07 省额度", ["actH"]], ["结尾", ["actO", "actP"]]];
+          const tot = Object.values(ACTS_DUR).reduce((a, b) => a + b, 0), W = 1560, Y0 = 40, H = 54;
+          mk("path", { class: "rail", d: "M0 " + Y0 + " H" + W + " M0 " + (Y0 + H) + " H" + W });
+          for (let x = 6; x < W; x += 18) { mk("rect", { class: "hole", x, y: Y0 - 13, width: 8, height: 7, rx: 1.5 }); mk("rect", { class: "hole", x, y: Y0 + H + 6, width: 8, height: 7, rx: 1.5 }); }
+          let x = 0; const segs = [];
+          groups.forEach(([lab, ids], i) => {
+            const w = ids.reduce((a, id) => a + ACTS_DUR[id], 0) / tot * W;
+            segs.push(mk("rect", { class: "seg", x: x + 3, y: Y0 + 4, width: Math.max(2, w - 6), height: H - 8, rx: 3 }));
+            if (i) mk("line", { class: "cut", x1: x, y1: Y0, x2: x, y2: Y0 + H });
+            const t = mk("text", { class: "lb", x: x + w / 2, y: Y0 + H + 44, "text-anchor": "middle" }); t.textContent = lab;
+            x += w;
+          });
+          const segW0 = ACTS_DUR.actA / tot * W, segWl = (ACTS_DUR.actO + ACTS_DUR.actP) / tot * W;
+          const hook = mk("path", { class: "hook", d: "M" + segW0 / 2 + " -40 V" + (Y0 - 8) + " M" + segW0 / 2 + " -12 c0 16 -16 18 -16 6" });
+          const arc = mk("path", { class: "arc", d: "M" + (W - segWl / 2) + " " + (Y0 + H + 60) + " C " + (W - 120) + " 230, 160 230, " + segW0 / 2 + " " + (Y0 + H + 60) });
+          const arcHead = mk("path", { class: "hook", d: "M" + segW0 / 2 + " " + (Y0 + H + 60) + " l-8 14 M" + segW0 / 2 + " " + (Y0 + H + 60) + " l12 10" });
+          gsap.set([...film.querySelectorAll(".rail, .hole, .cut, .lb"), hook, arcHead], { opacity: 0 });
+          tl.fromTo("#c-barcap", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.l7);
+          tl.to(film.querySelectorAll(".rail, .hole, .cut"), { opacity: 1, duration: 0.5 }, C.l7 + 0.1);
+          tl.to(film.querySelectorAll(".lb"), { opacity: 1, duration: 0.4, stagger: 0.05 }, C.l7 + 0.4);
+          // 钩子：开场那一格挂个鱼钩
+          tl.to(segs[0], { opacity: 1, duration: 0.3 }, C.l8 - 0.1);
+          const hl = hook.getTotalLength(); gsap.set(hook, { strokeDasharray: hl + " " + hl, strokeDashoffset: hl });
+          tl.set(hook, { opacity: 1 }, C.l8 + 0.5); tl.to(hook, { strokeDashoffset: 0, duration: 0.5, ease: "power2.out" }, C.l8 + 0.5);
+          pinAt("#c-hookn", 2100 + segW0 / 2 + 6, 470 - 26, false);
+          hfNote(tl, "#c-hookn", C.l8 + 0.9, 2.2);
+          // 中间每一章，只讲一件事
+          tl.to(segs[0], { opacity: 0.3, duration: 0.3 }, C.l9 - 0.2);
+          for (let i = 1; i <= 7; i++) { tl.to(segs[i], { opacity: 1, duration: 0.16 }, C.l9 + (i - 1) * 0.2); tl.to(segs[i], { opacity: 0.3, duration: 0.3 }, C.l9 + (i - 1) * 0.2 + 0.3); }
+          // 结尾，再回到开头那个问题
+          tl.to(segs[8], { opacity: 1, duration: 0.3 }, C.l10 - 0.1);
+          const al = arc.getTotalLength(); gsap.set(arc, { strokeDasharray: al + " " + al, strokeDashoffset: al, opacity: 0 });
+          tl.set(arc, { opacity: 1 }, C.l10 + 0.4); tl.to(arc, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }, C.l10 + 0.4);
+          tl.set(arc, { strokeDasharray: "7 7", strokeDashoffset: 0 }, C.l10 + 1.52);
+          tl.to(arcHead, { opacity: 1, duration: 0.2 }, C.l10 + 1.45);
+          tl.to(segs[0], { opacity: 1, duration: 0.3 }, C.l10 + 1.45);
+
+          // ── 看得见的：上一期颜色那一段 ──
+          hfWhip(tl, cam, "#c-w", document.getElementById("c-mbhg"), 4800, 540, 1, C.l11 - 0.45, "x");
+          hfReveal(tl, "#c-s1", C.l11 + 0.4);
+          tl.fromTo("#c-sarr", { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.out" }, C.l12 - 0.1);
+          hfReveal(tl, "#c-s2", C.l12 + 0.1);
+          hfArrive(tl, "#c-prev", C.l13 - 0.4, { z: -1600, rx: 12 });
+          tl.to("#c-s2", { opacity: 0.4, duration: 0.4 }, C.l13 - 0.3);
+          tl.to("#c-s2", { opacity: 1, duration: 0.4 }, C.l16 - 0.1);
+          tl.to("#c-s1", { opacity: 0.4, duration: 0.4 }, C.l16 - 0.1);
+          cam.breathe(tl, 4800, 540, 1.0, C.l13, C.l16e + 0.4, 0.03);
+
+          // ── 稿子像平时说话：这份稿子，停顿那一行就是气口 ──
+          hfWhip(tl, cam, "#c-w", document.getElementById("c-mbvg"), 4800, 1620, 1, C.l17 - 0.5, "y");
+          hfArrive(tl, "#c-script", C.l17 - 0.3, { z: -1400, rx: 10 });
+          hfFocus(tl, "#c-script", [8, 9, 10, 11, 12], C.l17 + 0.2);
+          [["#c-h8", C.l17], ["#c-h9", C.l18], ["#c-h10", C.l19], ["#c-h12", C.l19 + 1.0], ["#c-h11", C.l20]].forEach(([h, t]) => {
+            tl.fromTo(h, { opacity: 1, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.45, ease: "power3.out", immediateRender: false }, t);
+          });
+          pinAt("#c-gapn", 4300 + 760 * 1.32, 1230 + (64 + 11 * 23.25 + 11.6) * 1.32, false);   // 圆点落在 <pause 1.2> 那一行的右端
+          hfNote(tl, "#c-gapn", C.l19 + 1.2, 3.0);
+
+          // ── 时钟：这一段配音的真实波形，播放头跟着说话走 ──
+          hfWhip(tl, cam, "#c-w", document.getElementById("c-mbhg"), 2880, 1620, 1, C.l21 - 0.55, "x");
+          hfArrive(tl, "#c-clock", C.l21 - 0.35, { z: -1400, rx: 10 });
+          const T0 = C.l21 - 0.28, T1 = T0 + 17.0, W2 = 1500;   // 波形 = 配音文件里 C.l21 前 0.28 秒起的 17 秒（capture/make_waves.py 里的 wave_c）
+          document.querySelectorAll("#c-lines .c-ln").forEach((el) => {
+            const k = el.dataset.l, a = C[k], b = C[k + "e"];
+            el.style.left = ((a - T0) / (T1 - T0)) * W2 + "px"; el.style.width = Math.max(40, ((b - a) / (T1 - T0)) * W2 - 4) + "px";
+            tl.to(el, { opacity: 1, background: "#f2f2f2", color: "#111", duration: 0.2 }, a);
+            tl.to(el, { opacity: 0.55, background: "#2a2a2e", color: "#d8d8dc", duration: 0.3 }, b + 0.05);
+          });
+          tl.fromTo("#c-head", { x: 0 }, { x: W2, duration: T1 - T0, ease: "none" }, T0);
+          // 「记下每一句，是在第几秒说的」：film.json 里那一句
+          hfArrive(tl, "#c-fj", C.l23 - 0.2, { z: -1000, rx: 8 });
+          tl.fromTo("#c-filmhl", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, C.l23 + 0.6);
+          // 「排成一条时间轴」
+          pin("#c-tln", "#c-clock", "r", { at: 0.66 });
+          hfNote(tl, "#c-tln", C.l24, 3.0);
+          // 稿子 → 配音 → 画面
+          tl.to("#c-fj", { opacity: 0, duration: 0.4 }, C.l26 - 0.4);
+          [["#c-o1", C.l26], ["#c-o2", C.l27 + 0.1], ["#c-o3", C.l27 + 0.7]].forEach(([o, t]) => hfReveal(tl, o, t));
+          tl.fromTo("#c-oa1", { scaleX: 0 }, { scaleX: 1, duration: 0.35 }, C.l27);
+          tl.fromTo("#c-oa2", { scaleX: 0 }, { scaleX: 1, duration: 0.35 }, C.l27 + 0.6);
+          tl.to("#c-in", { opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in" }, C.end - 0.6);
+
+          window.__timelines["actC"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

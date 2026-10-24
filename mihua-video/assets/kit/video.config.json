@@ -1,0 +1,27 @@
+{
+ "title": "（这支视频的名字）",
+ "timing": "timing/film.json",
+ "acts": [
+  {"id": "actA", "lead": 0},
+  {"id": "actB", "lead": 0.2}
+ ],
+ "tail": 2.7,
+ "aliases": {
+  "actA": {"hello": "l1"}
+ },
+ "chapters": [
+  {"label": "（章节 1）", "act": "actB"}
+ ],
+ "navFrom": "actA.l2",
+ "navUntil": null,
+ "sigAt": "actA.l1",
+ "sfx": "sfx.json",
+ "music": "assets/music/bed.wav",
+ "voiceFile": "assets/voice/voice.wav",
+ "mix": "assets/mix/final.wav",
+ "srt": "renders/subtitles.srt",
+ "loudness": -10,
+ "textReplace": {},
+ "forbid": ["抖音", "快手", "视频号", "淘宝", "闲鱼", "加微信", "微信号"],
+ "fonts": {"sh-700": "AlimamaShuHeiTi-Bold.otf", "ph-400": "Alibaba-PuHuiTi-Regular.ttf", "ph-500": "Alibaba-PuHuiTi-Medium.ttf", "ph-700": "Alibaba-PuHuiTi-Bold.ttf"}
+}

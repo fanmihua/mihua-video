@@ -1,0 +1,1 @@
+Pixabay sound effects (Pixabay Content License: free commercial use, no attribution required). The .mp3 files are not included here: scripts/new_project.sh copies whoosh-short / whoosh-cinematic / click-soft .mp3 from the HyperFrames media-use skill.

@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__/
+node_modules/
+# 字体不随仓库分发（官方声明只授权下载和使用），从 https://www.alibabafonts.com 下载
+*.ttf
+*.otf
+*.woff2
+# 你自己的配音 key 和渲染产物不要进仓库
+.voice_keys.env
+keys.env
+renders/

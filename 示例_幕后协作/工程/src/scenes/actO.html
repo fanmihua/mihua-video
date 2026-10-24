@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actO 结尾。回到整个片场：开场那个问题 → 场记板（选题）、剧本（口播）亮起来：讲什么、怎么讲 → 布景板（风格）：风格的方向
+           → 分镜板和摄影机：画面和镜头，AI 照着这些做出来 → 先有故事，才有镜头：整个片场亮起来，米花挥手。 */
+        #o-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #o-card, #o-setw { position: absolute; inset: 0; }
+        #o-setw { transform-origin: 50% 50%; }
+        #o-q { position: absolute; left: 0; right: 0; top: 118px; display: flex; justify-content: center; }
+        #o-q .chip { font-size: 34px; padding: 14px 24px; opacity: 0; }
+        #o-x .tg text { font: 700 15px ShuHei, sans-serif; fill: #f7f7f5; }
+      </style>
+      <div id="o-root" data-composition-id="actO" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <div id="o-card"><div id="o-setw"><div class="mset" id="o-set"><!--@@INCLUDE:src/partials/set/set_actO.html@@-->
+          <svg class="mset-svg" id="o-x" viewBox="0 0 1920 1080">
+            <g class="tg" id="o-t1" transform="translate(420 640) rotate(-4) scale(1.5)"><g filter="url(#o-s-wob)"><rect x="-44" y="-14" width="88" height="28" rx="2" class="s th" fill="#161616" /></g><text x="0" y="6" text-anchor="middle">讲什么</text></g>
+            <g class="tg" id="o-t2" transform="translate(320 420) rotate(3) scale(1.5)"><g filter="url(#o-s-wob)"><rect x="-44" y="-14" width="88" height="28" rx="2" class="s th" fill="#161616" /></g><text x="0" y="6" text-anchor="middle">怎么讲</text></g>
+            <g class="tg" id="o-t3" transform="translate(1222 150) rotate(-2) scale(1.5)"><g filter="url(#o-s-wob)"><rect x="-62" y="-14" width="124" height="28" rx="2" class="s th" fill="#161616" /></g><text x="0" y="6" text-anchor="middle">风格的方向</text></g>
+            <g class="tg" id="o-t4" transform="translate(712 136) rotate(2) scale(1.5)"><g filter="url(#o-s-wob)"><rect x="-56" y="-14" width="112" height="28" rx="2" class="s th" fill="#161616" /></g><text x="0" y="6" text-anchor="middle">AI 照着做</text></g>
+            <g class="tg" id="o-t5" transform="translate(1600 330) rotate(-3) scale(1.5)"><g filter="url(#o-s-wob)"><rect x="-56" y="-14" width="112" height="28" rx="2" class="s th" fill="#161616" /></g><text x="0" y="6" text-anchor="middle">AI 照着做</text></g>
+          </svg>
+        </div></div><div class="mset-capfade"></div></div>
+        <div id="o-q"><span class="chip" id="o-qt">我到底给了 AI 什么？</span></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          const cam = hfCam("#o-setw");
+          const S = hfSet("o-s-", tl);
+          gsap.set(".tg", { opacity: 0 });
+          S.place(960, 806, 1.04);
+          S.pose(0, "mh-wave", [0, 1], "smile");
+          cam.set(1.08, 0, 0);
+          // 回到整个片场（从虚化里对焦出来）
+          tl.fromTo("#o-card", { opacity: 0, filter: "blur(14px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, 0);
+          cam.focus(tl, 960, 540, 1.0, 0, 2.0, "power2.out");
+          S.boil(0, C.end);
+          // 「回到开头那个问题」
+          hfReveal(tl, "#o-qt", C.l1 + 0.2);
+          // 「讲什么，怎么讲」：场记板（选题）和剧本（口播）
+          const dim = (keep, at) => S.corners.forEach((c, j) => tl.to(c, { opacity: keep.includes(j) ? 1 : 0.3, duration: 0.5 }, at));
+          dim([0, 1], C.l3 - 0.2);
+          tl.to("#o-t1", { opacity: 1, duration: 0.35 }, C.l4 - 0.1);
+          tl.to("#o-t2", { opacity: 1, duration: 0.35 }, C.l4 + 0.5);
+          S.clap(C.l4 + 0.1); S.script(C.l4 + 0.6);
+          // 「再加一个风格的方向」
+          dim([0, 1, 4], C.l5 - 0.2);
+          tl.to("#o-t3", { opacity: 1, duration: 0.35 }, C.l5 + 0.2);
+          S.style(C.l5 + 0.2);
+          // 「画面和镜头，都是 AI 照着这些做出来的」：分镜板、摄影机
+          dim([2, 5], C.l6 - 0.2);
+          tl.to(["#o-t1", "#o-t2", "#o-t3"], { opacity: 0.35, duration: 0.4 }, C.l6 - 0.2);
+          tl.to(["#o-t4", "#o-t5"], { opacity: 1, duration: 0.35, stagger: 0.3 }, C.l6 + 0.3);
+          S.crew(C.l6, 3.0);
+          // 「所以说，先有故事，才有镜头」：整个片场亮起来，米花挥手
+          dim([0, 1, 2, 3, 4, 5, 6], C.l7 - 0.2);
+          tl.to(".tg", { opacity: 0, duration: 0.5 }, C.l7 - 0.1);
+          tl.to("#o-qt", { opacity: 0, duration: 0.5 }, C.l7 - 0.1);
+          S.wave(C.l7 + 0.2, 2); S.hop(C.l7 + 1.4); S.blink(C.l7 + 0.8);
+          cam.focus(tl, 960, 560, 0.92, C.l7, C.end - C.l7, "power1.inOut");
+          tl.to("#o-card", { opacity: 0, filter: "blur(10px)", duration: 0.6, ease: "power2.in" }, C.end - 0.6);
+          window.__timelines["actO"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

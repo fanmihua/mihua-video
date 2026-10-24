@@ -1,0 +1,23 @@
+<pre><span class="n">176</span><span class="c">          // 说到哪一章，镜头和米花就到哪个角落；别的角落退后；道具动一下</span>
+<span class="n">177</span>          S.focus(cam, 0, C.topic - 0.7, 1.1);
+<span class="n">178</span>          S.clap(C.topic + 0.25);
+<span class="n">179</span>          S.K.forEach((k, i) =&gt; {
+<span class="n">180</span>            if (!i) <span class="k">return</span>;
+<span class="n">181</span>            <span class="k">const</span> key = [<span class="s">&quot;topic&quot;</span>, <span class="s">&quot;script&quot;</span>, <span class="s">&quot;board&quot;</span>, <span class="s">&quot;sound&quot;</span>, <span class="s">&quot;style&quot;</span>, <span class="s">&quot;crew&quot;</span>, <span class="s">&quot;quota&quot;</span>][i], at = C[key] - 0.55;
+<span class="n">182</span>            S.walk(k.mh[0], k.mh[1], k.mh[2], at - 0.2, 1.0);
+<span class="n">183</span>            S.focus(cam, i, at, 0.95);
+<span class="n">184</span>            S.blink(at + 1.0);
+<span class="n">185</span>          });
+<span class="n">186</span>          S.pose(C.script - 0.2, <span class="s">&quot;mh-down&quot;</span>, [-3, -3], <span class="s">&quot;smile&quot;</span>);     // 看剧本
+<span class="n">187</span>          S.script(C.script + 0.25);
+<span class="n">188</span>          S.pose(C.board - 0.2, <span class="s">&quot;mh-point&quot;</span>, [3, -4], <span class="s">&quot;smile&quot;</span>);      // 指着分镜板
+<span class="n">189</span>          S.board(C.board + 0.35, 0.34);
+<span class="n">190</span>          S.pose(C.sound - 0.2, <span class="s">&quot;mh-down&quot;</span>, [4, 0], <span class="s">&quot;oh&quot;</span>);           // 跟着话筒哼
+<span class="n">191</span>          S.sound(C.sound + 0.15, 2.2);
+<span class="n">192</span>          S.pose(C.style - 0.2, <span class="s">&quot;mh-down&quot;</span>, [4, 1], <span class="s">&quot;smile&quot;</span>);
+<span class="n">193</span>          S.style(C.style + 0.2);
+<span class="n">194</span>          S.pose(C.crew - 0.2, <span class="s">&quot;mh-down&quot;</span>, [4, -1], <span class="s">&quot;smile&quot;</span>);
+<span class="n">195</span>          S.crew(C.crew, 3.2);
+<span class="n">196</span>          S.pose(C.budget - 0.2, <span class="s">&quot;mh-down&quot;</span>, [4, 1], <span class="s">&quot;smile&quot;</span>);
+<span class="n">197</span>          S.quota(C.quota + 0.1);
+<span class="n">198</span></pre>

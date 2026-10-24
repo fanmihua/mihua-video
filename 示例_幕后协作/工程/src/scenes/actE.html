@@ -1,0 +1,381 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actE 04 声音。讲到哪个声音，就让大家真的听到，画面上放的是这支片子真实的音频波形（capture/make_waves.py 从混音里量）。
+           章节卡：04 角落（话筒冒声波）→ ① 三样：人声、配乐、音效三条真实音轨（整支片子）→ ② 配音：现在这一句的波形、作者录的 74 秒口播（克隆声音用的样本）、Fish Audio 官方页、稿子 → 配音
+           → ③ 多音字：稿子真文件里的读法 → ④ 停顿和原速：真实波形里那一下停顿量出来是几秒；每一章的语气起伏（音高变化，真实算的）
+           → ⑤ 配乐：合成程序真文件（原创、免版权）；我说话时配乐自动压低（闪避）；高光处多加层次 → ⑥ 音效：第一支的大音效、改好的小音效真放出来；换章才有
+           → ⑦ 整体音量：真的一起变小再一起调大（config 的 rides），比例不变。 */
+        #e-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #e-card, #e-setw, #e-in { position: absolute; inset: 0; }
+        #e-setw { transform-origin: 50% 50%; }
+        #e-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        .e-wv { position: absolute; }
+        .e-wv svg { width: 100%; height: 100%; display: block; }
+        .e-wv path { fill: rgba(255,255,255,0.82); }
+        .e-wv.dim path { fill: rgba(255,255,255,0.45); }
+        .e-head { position: absolute; width: 2px; background: #f4f4f4; box-shadow: 0 0 12px rgba(255,255,255,0.6); }
+        .e-row { position: absolute; left: 180px; width: 1400px; height: 130px; opacity: 0; }
+        .e-row .chip { position: absolute; left: 0; top: 38px; }
+        .e-row .e-wv { left: 180px; top: 0; width: 1220px; height: 130px; }
+        .e-cap { position: absolute; font: 600 20px/1 "PuHui", sans-serif; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); white-space: nowrap; opacity: 0; }
+        .e-strip { position: absolute; opacity: 0; }
+        .e-strip .chip { position: absolute; left: 0; top: -66px; font-size: 22px; padding: 10px 14px; }
+        /* ② 配音 */
+        #e-fish { left: 2420px; top: 250px; width: 1000px; height: 500px; opacity: 0; }
+        #e-fish .body { background: #fff; }
+        #e-fish .src { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+        #e-fish .src img { display: block; width: 1280px; height: 800px; }
+        #e-flow { position: absolute; left: 1920px; top: 800px; width: 1920px; display: flex; justify-content: center; align-items: center; gap: 22px; }
+        #e-flow .chip { font-size: 30px; padding: 14px 22px; opacity: 0; }
+        .e-arr { width: 70px; height: 2px; background: rgba(255,255,255,0.7); position: relative; transform-origin: 0 50%; }
+        .e-arr::after { content: ""; position: absolute; right: -2px; top: -6px; border-left: 12px solid rgba(255,255,255,0.85); border-top: 7px solid transparent; border-bottom: 7px solid transparent; }
+        /* ③ 多音字（x + 3840） */
+        #e-scw { position: absolute; left: 4080px; top: 300px; width: 1000px; height: 300px; transform: scale(1.45); transform-origin: 0 0; }
+        #e-script { position: absolute; left: 0; top: 0; width: 1000px; opacity: 0; }
+        #e-py { position: absolute; left: 4170px; top: 790px; display: flex; gap: 18px; }
+        #e-py .chip { opacity: 0; font-size: 28px; }
+        #e-py .chip.x { color: rgba(255,255,255,0.5); text-decoration: line-through; text-decoration-thickness: 2px; }
+        /* ④ 停顿 + 语气（x + 3840，y + 1080） */
+        #e-gapw { left: 4050px; top: 1270px; width: 1500px; height: 150px; }
+        #e-gapl { position: absolute; left: 4050px; top: 1210px; width: 1500px; height: 44px; }
+        .e-ln { position: absolute; top: 0; height: 40px; padding: 0 10px; border-radius: 7px; background: #2a2a2e; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); font: 500 15px/40px "PuHui", sans-serif; color: #d8d8dc; white-space: nowrap; overflow: hidden; }
+        #e-gapb { position: absolute; top: 1440px; height: 26px; border: 2.5px solid #f2f2f2; border-top: none; border-radius: 0 0 8px 8px; opacity: 0; }
+        #e-gapt { position: absolute; top: 1480px; font: 700 30px/1 "ShuHei", sans-serif; color: #f4f4f6; white-space: nowrap; opacity: 0; }
+        #e-speed { position: absolute; left: 5250px; top: 1480px; opacity: 0; }
+        #e-pitch { position: absolute; left: 4050px; top: 1590px; width: 1500px; height: 230px; opacity: 0; }
+        #e-pitch .bar { position: absolute; bottom: 40px; width: 110px; border-radius: 6px 6px 0 0; background: rgba(255,255,255,0.32); }
+        #e-pitch .lb { position: absolute; bottom: 0; width: 110px; text-align: center; font: 600 17px/1 "PuHui", sans-serif; color: rgba(255,255,255,0.6); white-space: nowrap; }
+        /* ⑤ 配乐（x + 1920，y + 1080） */
+        #e-mscw { position: absolute; left: 2120px; top: 1230px; width: 1060px; height: 260px; transform: scale(1.3); transform-origin: 0 0; }
+        #e-music { position: absolute; left: 0; top: 0; width: 1060px; opacity: 0; }
+        /* ⑤b 配乐跟着口播走（l35–l42，同一块画布：x 1920–3840，y 1080–2160） */
+        #e-whw { position: absolute; left: 2240px; top: 1360px; width: 320px; height: 320px; opacity: 0; }
+        #e-wheel { position: absolute; inset: 0; }
+        #e-wheel .ring { position: absolute; left: 30px; top: 30px; width: 260px; height: 260px; border-radius: 50%; border: 2px dashed rgba(255,255,255,0.35); }
+        .e-chd { position: absolute; width: 128px; height: 58px; margin: -29px 0 0 -64px; border-radius: 12px; background: #252528; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.16), 0 14px 30px rgba(0,0,0,0.45);
+          display: flex; align-items: center; justify-content: center; font: 700 24px/1 "ShuHei", sans-serif; color: #f2f2f2; }
+        .e-chd .o { position: absolute; inset: 0; border-radius: 12px; background: #f2f2f2; color: #161616; display: flex; align-items: center; justify-content: center; opacity: 0; }   /* 正在响的那个：白底黑字 */
+        #e-whc { position: absolute; left: 0; top: 140px; width: 320px; text-align: center; font: 700 25px/1 "ShuHei", sans-serif; color: #f4f4f6; }
+        #e-whc small { display: block; margin-top: 10px; font: 600 16px/1 "PuHui", sans-serif; color: rgba(255,255,255,0.55); }
+        #e-olds .sep { position: absolute; top: -8px; width: 0; height: 146px; border-left: 2px dashed rgba(255,255,255,0.5); }
+        #e-olds .lp { position: absolute; top: 146px; width: 232px; text-align: center; font: 600 17px/1 "PuHui", sans-serif; color: rgba(255,255,255,0.6); }
+        #e-oq { position: absolute; left: 2720px; top: 1660px; opacity: 0; }
+        #e-oq .chip { font-size: 28px; }
+        .e-lt { position: absolute; top: -40px; height: 26px; opacity: 0; }
+        .e-lt i { position: absolute; left: 0; right: 0; top: 20px; height: 0; border-top: 2px solid rgba(255,255,255,0.55); }
+        .e-lt i::after { content: ""; position: absolute; right: -1px; top: -9px; height: 16px; border-right: 2px solid #f4f4f6; }
+        .e-lt b { position: absolute; right: -4px; top: -6px; transform: translateX(100%); padding-left: 6px; font: 700 16px/1 "JetBrains Mono", monospace; color: #f4f4f6; white-space: nowrap; }
+        #e-fjs { position: absolute; left: 2900px; top: 1200px; opacity: 0; }
+        #e-fjs .chip { font-size: 20px; padding: 9px 13px; }
+        #e-fpz { position: absolute; top: -10px; height: 130px; border-radius: 10px; opacity: 0; box-shadow: 0 0 0 2.5px #f4f4f4, 0 0 0 4.5px rgba(12,12,13,0.92); }
+        #e-fpl { position: absolute; top: 1690px; opacity: 0; font: 600 20px/1 "PuHui", sans-serif; color: #f4f4f6; white-space: nowrap; }
+        .e-nt { position: absolute; width: 22px; height: 30px; opacity: 0; }
+        .e-nt path, .e-nt ellipse { fill: #f4f4f6; stroke: none; }
+        #e-chs { position: absolute; left: 2130px; top: 1600px; width: 1500px; height: 56px; opacity: 0; }
+        #e-chs .sg { position: absolute; top: 0; height: 56px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12); overflow: hidden; display: flex; align-items: center; padding-left: 10px;
+          font: 700 15px/1 "JetBrains Mono", monospace; white-space: nowrap; }
+        /* ⑥ 音效（y + 1080） */
+        #e-chap { position: absolute; left: 180px; top: 1810px; width: 1560px; height: 80px; overflow: visible; opacity: 0; }
+        #e-chap .rail { fill: none; stroke: rgba(255,255,255,0.6); stroke-width: 2; }
+        #e-chap .cut { stroke: rgba(255,255,255,0.35); stroke-width: 1.5; }
+        #e-chap .mk { fill: #f4f4f4; }
+        #e-chap .lb { font: 600 15px "PuHui", sans-serif; fill: rgba(255,255,255,0.6); }
+        /* ⑦ 整体音量（y + 2160） */
+        .e-meter { position: absolute; width: 90px; height: 300px; border-radius: 10px; background: rgba(255,255,255,0.08); box-shadow: inset 0 0 0 1.5px rgba(255,255,255,0.14); overflow: hidden; opacity: 0; }
+        .e-meter i { position: absolute; left: 0; right: 0; bottom: 0; background: #f2f2f2; transform-origin: 50% 100%; }
+        .e-meter + .e-cap { opacity: 0; }
+      </style>
+      <div id="e-root" data-composition-id="actE" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <svg width="0" height="0" style="position:absolute"><filter id="e-mbh" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur id="e-mbhg" stdDeviation="0 0" /></filter><filter id="e-mbv" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="e-mbvg" stdDeviation="0 0" /></filter></svg>
+        <div id="e-card"><div id="e-setw"><div class="mset" id="e-set"><!--@@INCLUDE:src/partials/set/set_actE.html@@--></div></div><div class="mset-capfade"></div></div>
+
+        <div id="e-in"><div id="e-w">
+          <!-- ① 三样：这支片子真实的三条音轨 -->
+          <div class="e-cap" id="e-c1" style="left:180px; top:200px">这一支片子里的 40 秒 · 三条声音</div>
+          <div class="e-row" id="e-r1" style="top:260px"><span class="chip">人声</span><div class="e-wv"><!--@@INCLUDE:src/partials/wave/e_voice_win.html@@--></div></div>
+          <div class="e-row" id="e-r2" style="top:450px"><span class="chip">配乐</span><div class="e-wv"><!--@@INCLUDE:src/partials/wave/e_bed_win.html@@--></div></div>
+          <div class="e-row" id="e-r3" style="top:640px"><span class="chip">音效</span><div class="e-wv"><!--@@INCLUDE:src/partials/wave/e_sfx_win.html@@--></div></div>
+          <div class="note" id="e-n1"><span class="dot"></span><span class="ln"></span><span class="t">声音最大</span></div>
+          <div class="note" id="e-n2"><span class="dot"></span><span class="ln"></span><span class="t">垫在底下</span></div>
+          <div class="note" id="e-n3"><span class="dot"></span><span class="ln"></span><span class="t">偶尔出现</span></div>
+
+          <!-- ② 配音 -->
+          <div class="e-strip" id="e-now" style="left:2130px; top:300px; width:1500px; height:140px"><span class="chip">现在这一句</span><div class="e-wv" style="left:0; top:0; width:1500px; height:140px"><!--@@INCLUDE:src/partials/wave/e_now.html@@--></div><div class="e-head" id="e-nowh" style="left:0; top:-6px; height:152px"></div></div>
+          <div class="e-strip" id="e-clone" style="left:2130px; top:600px; width:1500px; height:120px"><span class="chip">我录的口播 · 1 分 14 秒</span><div class="e-wv dim" style="left:0; top:0; width:1500px; height:120px"><!--@@INCLUDE:src/partials/wave/e_clone.html@@--></div></div>
+          <div class="win" id="e-fish"><div class="bar"><i></i><i></i><i></i><b>Fish Audio 官方文档 · 克隆声音</b></div><div class="body"><div class="crop"><div class="src" style="transform: translate(-200px, -60px) scale(0.92)"><img src="assets/web/doc_fish_clone.png" alt="" /><div class="outline dark" style="left:654px; top:274px; width:174px; height:32px"></div></div></div></div></div>
+          <div id="e-flow"><span class="chip" id="e-f1">稿子</span><div class="e-arr" id="e-fa1"></div><span class="chip" id="e-f2">Fish Audio</span><div class="e-arr" id="e-fa2"></div><span class="chip" id="e-f3">配音</span></div>
+
+          <!-- ③ 多音字：稿子真文件里写的读法 -->
+          <div id="e-scw"><div class="code doc" id="e-script"><div class="tab say"><span class="s">稿子里提前写好读法</span><b>script.md</b></div><!--@@INCLUDE:src/partials/script-e.html@@-->
+            <div class="hl" id="e-h2" style="top:87.25px"></div><div class="hl" id="e-h7" style="top:203.5px"></div></div></div>
+          <div id="e-py"><span class="chip" id="e-p1">该读 háng</span><span class="chip x" id="e-p2">读成了 xíng</span></div>
+          <div class="note" id="e-tn"><span class="dot"></span><span class="ln"></span><span class="t">转回文字<small>照样写成「行」，看不出来</small></span></div>
+
+          <!-- ④ 停顿和原速 + 每一章的语气起伏 -->
+          <div class="e-cap" id="e-c4" style="left:4050px; top:1150px">这几句的真实波形</div>
+          <div id="e-gapl"><div class="e-ln" data-l="l20">所以要提前在稿子里</div><div class="e-ln" data-l="l21">写成航空的「航」</div><div class="e-ln" data-l="l22">换话题的地方，要多停一下</div></div>
+          <div class="e-wv" id="e-gapw"><!--@@INCLUDE:src/partials/wave/e_gap.html@@--></div>
+          <div class="e-head" id="e-gaph" style="left:4050px; top:1264px; height:162px; opacity:0"></div>
+          <div id="e-gapb"></div><div id="e-gapt">停了 0 秒</div>
+          <div id="e-speed"><span class="chip">语速：原来的</span></div>
+          <div id="e-pitch"></div>
+          <div class="e-cap" id="e-c5" style="left:4050px; top:1560px">每一章的语气起伏（音高变化）</div>
+          <div class="note" id="e-pn"><span class="dot"></span><span class="ln"></span><span class="t">起伏大的那段<small>重新合成一条，挑平稳的</small></span></div>
+
+          <!-- ⑤ 配乐：合成程序真文件；闪避；高光多加层次 -->
+          <div id="e-mscw"><div class="code" id="e-music"><div class="tab say"><span class="s">配乐：AI 写的合成程序</span><b>music/music_follow.py</b></div><!--@@INCLUDE:src/partials/music.html@@-->
+            <div class="hl" id="e-m1" style="top:64px"></div></div></div>
+          <div class="note" id="e-mn"><span class="dot"></span><span class="ln"></span><span class="t">原创合成<small>不用担心版权</small></span></div>
+          <div class="e-strip" id="e-dv" style="left:2130px; top:1330px; width:1500px; height:130px"><span class="chip">人声</span><div class="e-wv" style="left:0; top:0; width:1500px; height:130px"><!--@@INCLUDE:src/partials/wave/e_duck_v.html@@--></div></div>
+          <div class="e-strip" id="e-dm" style="left:2130px; top:1580px; width:1500px; height:130px"><span class="chip">配乐</span><div class="e-wv" style="left:0; top:0; width:1500px; height:130px"><!--@@INCLUDE:src/partials/wave/e_duck_m.html@@--></div></div>
+          <div class="e-head" id="e-dh" style="left:2130px; top:1320px; height:400px; opacity:0"></div>
+          <div class="note" id="e-dn"><span class="dot"></span><span class="ln"></span><span class="t">闪避<small>说话时配乐自动压低</small></span></div>
+          <!-- ⑤b 配乐跟着口播走：以前一组和弦一直在转 → 现在跟着口播走（人声、配乐两条真实波形）→ 换一章换一组和弦 -->
+          <div id="e-whw"><div id="e-wheel"><div class="ring"></div>
+            <div class="e-chd" id="e-k0" style="left:160px; top:20px">Fmaj7<b class="o">Fmaj7</b></div><div class="e-chd" id="e-k1" style="left:300px; top:160px">G6<b class="o">G6</b></div>
+            <div class="e-chd" id="e-k2" style="left:160px; top:300px">Em7<b class="o">Em7</b></div><div class="e-chd" id="e-k3" style="left:20px; top:160px">Am7<b class="o">Am7</b></div></div>
+            <div id="e-whc">以前的配乐<small>4 个和弦</small></div></div>
+          <div class="e-strip" id="e-olds" style="left:2720px; top:1400px; width:930px; height:130px"><span class="chip">以前的配乐 · 真实波形</span><div class="e-wv dim" style="left:0; top:0; width:930px; height:130px"><!--@@INCLUDE:src/partials/wave/e_old.html@@--></div>
+            <span class="sep" style="left:232.5px"></span><span class="sep" style="left:465px"></span><span class="sep" style="left:697.5px"></span>
+            <span class="lp" style="left:0">第 1 圈</span><span class="lp" style="left:232.5px">第 2 圈 · 一样</span><span class="lp" style="left:465px">第 3 圈 · 一样</span><span class="lp" style="left:697.5px">第 4 圈 · 一样</span></div>
+          <div id="e-oq"><span class="chip">「一直是一个频率」</span></div>
+          <div class="e-strip" id="e-fv" style="left:2130px; top:1330px; width:1500px; height:110px"><span class="chip">人声</span><div class="e-wv" style="left:0; top:0; width:1500px; height:110px"><!--@@INCLUDE:src/partials/wave/e_fol_v.html@@--></div>
+            <div class="e-lt" id="e-lt1"><i></i><b></b></div><div class="e-lt" id="e-lt2"><i></i><b></b></div><div class="e-lt" id="e-lt3"><i></i><b></b></div><div class="e-lt" id="e-lt4"><i></i><b></b></div></div>
+          <div class="e-strip" id="e-fm" style="left:2130px; top:1560px; width:1500px; height:110px"><span class="chip">现在的配乐</span><div class="e-wv" style="left:0; top:0; width:1500px; height:110px"><!--@@INCLUDE:src/partials/wave/e_fol_m.html@@--></div>
+            <div id="e-fpz"></div>
+            <svg class="e-nt" id="e-nt1" viewBox="0 0 22 30"><ellipse cx="7" cy="24" rx="6.5" ry="5" /><path d="M12 24 V3 h3 V24 Z M12 3 q8 3 9 10 q-4 -5 -9 -6 Z" /></svg>
+            <svg class="e-nt" id="e-nt2" viewBox="0 0 22 30"><ellipse cx="7" cy="24" rx="6.5" ry="5" /><path d="M12 24 V3 h3 V24 Z M12 3 q8 3 9 10 q-4 -5 -9 -6 Z" /></svg>
+            <svg class="e-nt" id="e-nt3" viewBox="0 0 22 30"><ellipse cx="7" cy="24" rx="6.5" ry="5" /><path d="M12 24 V3 h3 V24 Z M12 3 q8 3 9 10 q-4 -5 -9 -6 Z" /></svg></div>
+          <div class="e-head" id="e-fh" style="left:2130px; top:1300px; height:400px; opacity:0"></div>
+          <div id="e-fpl">停下来 3 秒 · 钢琴接一句</div>
+          <div id="e-fjs"><span class="chip">timing/film.json · 每一句的起止秒数</span></div>
+          <div id="e-chs"></div>
+          <div class="e-strip" id="e-bl" style="left:2130px; top:1820px; width:1500px; height:90px"><span class="chip">整支片子的配乐</span><div class="e-wv dim" style="left:0; top:0; width:1500px; height:90px"><!--@@INCLUDE:src/partials/wave/e_bed_lifts.html@@--></div><svg id="e-lifts" viewBox="0 0 1500 90" style="position:absolute; left:0; top:0; width:1500px; height:90px; overflow:visible"></svg></div>
+          <div class="note" id="e-ln"><span class="dot"></span><span class="ln"></span><span class="t">画面最重要的地方<small>钢琴更亮、沙锤更密</small></span></div>
+
+          <!-- ⑥ 音效：真放出来 -->
+          <div class="e-cap" id="e-c6" style="left:180px; top:1230px">这几秒的真实混音</div>
+          <div class="e-strip" id="e-fx" style="left:210px; top:1300px; width:1500px; height:260px"><div class="e-wv" id="e-fxw" style="left:0; top:0; width:1500px; height:260px"><!--@@INCLUDE:src/partials/wave/e_sfxdemo.html@@--></div><div class="e-head" id="e-fxh" style="left:0; top:-8px; height:276px"></div></div>
+          <div class="note" id="e-x1"><span class="dot"></span><span class="ln"></span><span class="t">第一支的转场音效<small>比说话还大</small></span></div>
+          <div class="note" id="e-x2"><span class="dot"></span><span class="ln"></span><span class="t">改好以后</span></div>
+          <svg id="e-chap" viewBox="0 0 1560 80"></svg>
+
+          <!-- ⑦ 整体音量 -->
+          <div class="e-cap" id="e-c7" style="left:180px; top:2310px">这几秒的真实混音</div>
+          <div class="e-strip" id="e-rd" style="left:180px; top:2380px; width:1180px; height:300px"><div class="e-wv" id="e-rdw" style="left:0; top:0; width:1180px; height:300px"><!--@@INCLUDE:src/partials/wave/e_ride.html@@--></div><div class="e-head" id="e-rdh" style="left:0; top:-8px; height:316px"></div></div>
+          <div class="e-meter" id="e-mv" style="left:1480px; top:2380px"><i id="e-mvi" style="height:80%"></i></div><div class="e-cap" style="left:1490px; top:2700px">人声</div>
+          <div class="e-meter" id="e-mm" style="left:1610px; top:2380px"><i id="e-mmi" style="height:40%"></i></div><div class="e-cap" style="left:1620px; top:2700px">配乐</div>
+          <div class="e-cap" id="e-ratio" style="left:1470px; top:2330px">比例不变</div>
+        </div></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/kit.js@@-->
+        <!--@@INCLUDE:src/partials/acts_dur.js@@-->
+        <!--@@INCLUDE:src/partials/pitch.js@@-->
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          kPinTimeline(tl, C.end);
+          // 章节卡：04 声音（话筒冒声波、音符飘起来）
+          hfCard("e-s-", tl, hfCam("#e-setw"), 3, { prop: C.l1 - 0.2, hold: C.l4 });
+          const o1 = C.l4 - 0.5;
+          tl.to("#e-card", { opacity: 0, filter: "blur(16px)", scale: 1.06, duration: 0.6, ease: "power2.in" }, o1);
+          gsap.set("#e-in", { opacity: 0 });
+          tl.fromTo("#e-in", { opacity: 0, filter: "blur(16px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power2.out" }, o1 + 0.3);
+          const cam = hfCam("#e-w");
+          const mbh = document.getElementById("e-mbhg"), mbv = document.getElementById("e-mbvg");
+          // 播放头：从 a 秒走到 b 秒（波形是这段真实音频；画面和声音同步走）
+          const play = (head, x0, w, a, b) => tl.fromTo(head, { x: 0 }, { x: w, duration: b - a, ease: "none" }, a);
+
+          // ── ① 三样 ──
+          // 截的是分镜章开头前后 40 秒（capture/make_waves.py 同一段），标签写真实的时间
+          const mmss = (t) => Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
+          document.getElementById("e-c1").textContent = "这一支片子 " + mmss(ACTS_START.actD - 20) + "–" + mmss(ACTS_START.actD + 20) + " · 三条声音";
+          tl.fromTo("#e-c1", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l4);
+          ["#e-r1", "#e-r2", "#e-r3"].forEach((r, i) => tl.fromTo(r, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, C.l4 + 0.4 + i * 0.35));   // 「有三样」时三条进来
+          pin("#e-n1", "#e-r1", "r", { at: 0.5 }); pin("#e-n2", "#e-r2", "r", { at: 0.5 }); pin("#e-n3", "#e-r3", "r", { at: 0.5 });
+          [["#e-r1", "#e-n1", C.l6], ["#e-r2", "#e-n2", C.l7], ["#e-r3", "#e-n3", C.l8]].forEach(([r, n, t], i) => {
+            tl.to(["#e-r1", "#e-r2", "#e-r3"].filter((x) => x !== r), { opacity: 0.35, duration: 0.4 }, t - 0.1);
+            tl.to(r, { opacity: 1, duration: 0.4 }, t - 0.1);
+            hfNote(tl, n, t + 0.2, 1.4);
+          });
+          tl.to(["#e-r1", "#e-r2", "#e-r3"], { opacity: 1, duration: 0.4 }, C.l8e + 0.3);
+
+          // ── ② 配音 ──
+          hfWhip(tl, cam, "#e-w", mbh, 2880, 540, 1, C.l9 - 0.45, "x");
+          tl.fromTo("#e-now", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l10 - 0.3);
+          play("#e-nowh", 0, 1500, C.l10 - 0.2, C.l10 - 0.2 + 8.0);   // e_now = 配音里 C.l10 前 0.2 秒起的 8 秒
+          tl.fromTo("#e-clone", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5 }, C.l11 + 0.2);
+          tl.to(["#e-now", "#e-clone"], { opacity: 0.25, duration: 0.4 }, C.l12 - 0.3);
+          hfArrive(tl, "#e-fish", C.l12 - 0.3, { z: -1400, rx: 10 });
+          tl.to("#e-fish", { opacity: 0.4, duration: 0.4 }, C.l13 - 0.2);
+          [["#e-f1", C.l13], ["#e-f2", C.l13 + 0.6], ["#e-f3", C.l14]].forEach(([c, t]) => hfReveal(tl, c, t));
+          tl.fromTo("#e-fa1", { scaleX: 0 }, { scaleX: 1, duration: 0.3 }, C.l13 + 0.4);
+          tl.fromTo("#e-fa2", { scaleX: 0 }, { scaleX: 1, duration: 0.3 }, C.l14 - 0.2);
+
+          // ── ③ 多音字 ──
+          hfWhip(tl, cam, "#e-w", mbh, 4800, 540, 1, C.l15 - 0.45, "x");
+          hfArrive(tl, "#e-script", C.l15 - 0.2, { z: -1200, rx: 10 });
+          tl.fromTo("#e-h2", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, C.l16 + 0.2);
+          hfReveal(tl, "#e-p1", C.l17 - 0.1);
+          hfReveal(tl, "#e-p2", C.l18 + 0.2);
+          pin("#e-tn", "#e-scw", "r", { at: 0.66 });
+          hfNote(tl, "#e-tn", C.l19 + 0.2, 2.3);
+          tl.fromTo("#e-h7", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, C.l21 - 0.1);
+
+          // ── ④ 停顿和原速 ──
+          hfWhip(tl, cam, "#e-w", mbv, 4800, 1620, 1, C.l22 - 0.5, "y");
+          const G0 = C.l20 - 0.3, G1 = C.l22e + 0.3, GW = 1500;   // e_gap = 配音里 C.l20 前 0.3 秒 到 C.l22 结束后 0.3 秒
+          document.querySelectorAll("#e-gapl .e-ln").forEach((el) => {
+            const a = C[el.dataset.l], b = C[el.dataset.l + "e"];
+            el.style.left = ((a - G0) / (G1 - G0)) * GW + "px"; el.style.width = Math.max(40, ((b - a) / (G1 - G0)) * GW - 4) + "px";
+          });
+          tl.fromTo(["#e-c4", "#e-gapl", "#e-gapw"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.l22 - 0.1);
+          // 量出来的停顿：「航」说完到下一句开口
+          const gap = C.l22 - C.l21e, gx0 = 4050 + ((C.l21e - G0) / (G1 - G0)) * GW, gx1 = 4050 + ((C.l22 - G0) / (G1 - G0)) * GW;
+          const gb = document.getElementById("e-gapb"); gb.style.left = gx0 + "px"; gb.style.width = Math.max(10, gx1 - gx0) + "px";
+          const gt = document.getElementById("e-gapt"); gt.textContent = "停了 " + gap.toFixed(1) + " 秒"; gt.style.left = (gx0 + gx1) / 2 - 80 + "px";
+          tl.fromTo(gb, { opacity: 0, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.45, ease: "power3.out" }, C.l22 + 0.6);
+          tl.fromTo(gt, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.45 }, C.l22 + 0.8);
+          hfReveal(tl, "#e-speed", C.l23 - 0.1);
+          // 每一章的语气起伏（PITCH：每章音高的半音标准差，capture/make_waves.py 从配音里算）
+          const pitch = document.getElementById("e-pitch"), names = { actA: "开场", actB: "选题", actC: "口播", actD: "分镜", actE: "声音", actF: "风格", actG: "协作", actH: "省额度", actO: "结尾" };
+          const ks = Object.keys(names), mx = Math.max(...ks.map((k) => PITCH[k] || 0), 0.01);
+          ks.forEach((k, i) => {
+            const b = document.createElement("div"); b.className = "bar"; b.style.left = i * 160 + 40 + "px"; b.style.height = Math.max(6, (PITCH[k] || 0) / mx * 170) + "px"; pitch.appendChild(b);
+            const l = document.createElement("div"); l.className = "lb"; l.style.left = i * 160 + 40 + "px"; l.textContent = names[k]; pitch.appendChild(l);
+          });
+          tl.to(["#e-c4", "#e-gapl", "#e-gapw", gb, gt, "#e-speed"], { opacity: 0.35, duration: 0.4 }, C.l25 - 0.3);
+          tl.fromTo(["#e-c5", "#e-pitch"], { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.l25 - 0.1);
+          tl.fromTo("#e-pitch .bar", { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.6, ease: "power3.out", stagger: 0.06 }, C.l26);
+          pin("#e-pn", "#e-pitch", "t", { at: 0.62 });
+          hfNote(tl, "#e-pn", C.l27 + 0.2, 3.2);
+
+          // ── ⑤ 配乐 ──
+          hfWhip(tl, cam, "#e-w", mbh, 2880, 1620, 1, C.l29 - 0.45, "x");
+          hfArrive(tl, "#e-music", C.l30 - 0.3, { z: -1200, rx: 10 });
+          tl.fromTo("#e-m1", { scaleX: 0 }, { scaleX: 1, duration: 0.45, ease: "power3.out" }, C.l30 + 0.4);
+          pin("#e-mn", "#e-mscw", "r", { at: 0.2 });
+          hfNote(tl, "#e-mn", C.l31, 2.0);
+          // 闪避：同一段的人声和配乐，配乐在说话时压低
+          tl.to(["#e-music", "#e-mn"], { opacity: 0, duration: 0.4 }, C.l32 - 0.4);
+          tl.fromTo(["#e-dv", "#e-dm"], { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.2 }, C.l32 - 0.3);
+          const D0 = C.l32 - 1.0;   // e_duck_v / e_duck_m = 混音里 C.l32 前 1 秒起的 10 秒
+          tl.set("#e-dh", { opacity: 1 }, D0); play("#e-dh", 0, 1500, D0, D0 + 10);
+          pin("#e-dn", "#e-dm", "b", { at: Math.min(0.9, Math.max(0.1, (C.l33 - 0.6 - D0) / 10)) });
+          hfNote(tl, "#e-dn", C.l34 - 0.1, 2.6);
+          // ── ⑤b 配乐跟着口播走（一组和弦从头转到尾听着单调 → 改成跟着口播变化；这段把前后两版都放给观众听） ──
+          // 「以前的配乐，从头到尾 / 就是一组和弦，一直在转」：闪避那两条收掉，四个和弦围成一圈；旁边是以前配乐的真实波形，四圈一模一样。
+          // 配乐里这一段真的在放以前那组循环（music/music_follow.py：从 C.l35 前 0.3 秒到 C.l37 前 0.15 秒，一小节一个和弦），转盘一小节转一格，正在响的那个和弦亮
+          tl.to(["#e-dv", "#e-dm", "#e-dh", "#e-dn"], { opacity: 0, duration: 0.4 }, C.l35 - 0.45);
+          cam.focus(tl, 2918, 1520, 1.25, C.l35 - 0.45, 0.9);   // 镜头推近一点，转盘和波形居中、填满画面
+          tl.fromTo("#e-whw", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, C.l35 - 0.3);
+          tl.fromTo("#e-olds", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.l35 + 0.4);
+          const BAR = 4 * 60 / 92, OA = C.l35 - 0.3, OB = C.l37 - 0.15;
+          const chk = ["#e-k0", "#e-k1", "#e-k2", "#e-k3"];
+          for (let b = 0; OA + b * BAR < OB - 0.2; b++) {
+            const t = OA + b * BAR;
+            if (b > 0) { tl.to("#e-wheel", { rotation: -90 * b, duration: 0.7, ease: "power2.inOut" }, t - 0.35); tl.to(".e-chd", { rotation: 90 * b, duration: 0.7, ease: "power2.inOut" }, t - 0.35); }
+            chk.forEach((k, j) => tl.set(k + " .o", { opacity: j === b % 4 ? 1 : 0 }, t));
+          }
+          tl.set(chk.map((k) => k + " .o"), { opacity: 0 }, OB);
+          // 「我看样片的时候，觉得一直是一个频率」
+          hfReveal(tl, "#e-oq", C.l37 + 0.3);
+          // 「后来就改成，配乐跟着口播走」：同一段的人声和现在的配乐，两条对齐，播放头跟着声音走
+          tl.to(["#e-whw", "#e-olds", "#e-oq"], { opacity: 0, duration: 0.4 }, C.l38 - 0.5);
+          const F0 = C.l38 - 0.4, F1 = C.l42 + 0.2, FX = (t) => (t - F0) / (F1 - F0) * 1500;   // e_fol_v / e_fol_m = 混音里 F0–F1
+          cam.focus(tl, 2880, 1460, 1.15, C.l38 - 0.5, 0.9);
+          tl.fromTo(["#e-fv", "#e-fm"], { opacity: 0 }, { opacity: 1, duration: 0.5, stagger: 0.2 }, C.l38 - 0.4);
+          tl.set("#e-fh", { opacity: 1 }, F0); play("#e-fh", 0, 1500, F0, F1);
+          // 「稿子里每一句在第几秒说完」：每一句上面一条线，末端写真实的「说完」时间（timing/film.json 里的 end）
+          const ms = (t) => Math.floor(t / 60) + ":" + (t % 60).toFixed(1).padStart(4, "0");
+          ["l38", "l39", "l40", "l41"].forEach((l, i) => {
+            const a = C[l], b = C[l + "e"], el = document.getElementById("e-lt" + (i + 1));
+            el.style.left = FX(a) + "px"; el.style.width = (FX(b) - FX(a)) + "px";
+            el.querySelector("b").textContent = ms(ACTS_START.actE + b);
+            tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.35 }, C.l39 + 0.2 + i * 0.3);
+          });
+          hfReveal(tl, "#e-fjs", C.l40 - 0.1);                             // 「AI 都知道」
+          // 「所以我停下来的地方，钢琴会接一小句」：停顿那 3 秒框出来，钢琴接的那一句冒出小音符（配乐在这 3 秒单独放大，config rides）
+          const P0 = C.l41e, P1 = C.l42;
+          gsap.set("#e-fpz", { left: FX(P0) - 6, width: FX(P1) - FX(P0) + 12 });
+          tl.fromTo("#e-fpz", { opacity: 0 }, { opacity: 1, duration: 0.3 }, P0 - 0.2);
+          gsap.set("#e-fpl", { left: 2130 + FX(P0) });
+          tl.fromTo("#e-fpl", { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.4 }, P0);
+          ["#e-nt1", "#e-nt2", "#e-nt3"].forEach((n, i) => {
+            gsap.set(n, { left: FX(P0 + 0.4 + i * 0.9) - 11, top: -42 - (i % 2) * 14 });
+            tl.fromTo(n, { opacity: 0, y: 12, scale: 0.6 }, { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(2)" }, P0 + 0.4 + i * 0.9);
+          });
+          // 「换一章，就换一组和弦」：整支片子按章分段，每一段写这一章用的和弦（music/music_follow.py 的 CHAP 表；改了那张表要跟着改）
+          tl.to(["#e-fv", "#e-fm", "#e-fh", "#e-fpl", "#e-fjs"], { opacity: 0, duration: 0.35 }, C.l42 - 0.25);
+          const CH = { actA: "Fmaj7…", actB: "Cmaj7…", actC: "Em9…", actD: "F#m7 Dmaj7 Aadd9 E6", actE: "Fmaj7 Am7 Bbmaj7 C6",
+            actF: "Ebmaj7 Dm7 Cm9 Bbmaj7 …", actG: "Dm9…", actH: "Bm7…", actO: "", actP: "" };   // 窄的章只写第一个和弦
+          const chs = document.getElementById("e-chs"), totE = Object.values(ACTS_DUR).reduce((a, b) => a + b, 0);
+          Object.keys(ACTS_DUR).forEach((id, i) => {
+            const sg = document.createElement("div"); sg.className = "sg";
+            const x = (ACTS_START[id] / totE) * 1500, w = (ACTS_DUR[id] / totE) * 1500;
+            sg.style.left = (x + 1) + "px"; sg.style.width = (w - 2) + "px";
+            const g = i % 2 ? 0.16 : 0.27; sg.style.background = "rgba(255,255,255," + g + ")"; sg.style.color = "rgba(255,255,255,0.92)";
+            sg.textContent = CH[id] || ""; chs.appendChild(sg);
+            tl.fromTo(sg, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, C.l42 + 0.1 + i * 0.07);
+          });
+          tl.set("#e-chs", { opacity: 1 }, C.l42 - 0.05);
+          cam.focus(tl, 2880, 1720, 1.12, C.l42 - 0.3, 0.9);   // 章节条和下面「整支片子的配乐」一起看
+          // 画面推到最重要的地方，配乐多加一点层次：整支片子的配乐，标出高光
+          tl.fromTo("#e-bl", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.l43 - 0.2);
+          const tot = Object.values(ACTS_DUR).reduce((a, b) => a + b, 0), lifts = document.getElementById("e-lifts");
+          LIFTS.forEach((t) => { const x = (t / tot) * 1500; const m = document.createElementNS("http://www.w3.org/2000/svg", "path"); m.setAttribute("d", "M" + x + " -14 V104"); m.setAttribute("stroke", "#f4f4f4"); m.setAttribute("stroke-width", "2.5"); m.setAttribute("stroke-dasharray", "4 4"); lifts.appendChild(m); });
+          tl.fromTo("#e-lifts", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l44 - 0.1);
+          pinAt("#e-ln", 2130 + (LIFTS[0] / tot) * 1500, 1806, false);
+          hfNote(tl, "#e-ln", C.l44 + 0.3, 2.4);
+
+          // ── ⑥ 音效：真放出来 ──
+          hfWhip(tl, cam, "#e-w", mbh, 960, 1620, 1, C.l45 - 0.45, "x");
+          tl.fromTo(["#e-c6", "#e-fx"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l46 - 0.3);
+          const X0 = C.l46, X1 = C.l49 + 0.5;   // e_sfxdemo = 混音里 C.l46 到 C.l49 后 0.5 秒
+          gsap.set("#e-fxw", { clipPath: "inset(0 100% 0 0)" });
+          tl.to("#e-fxw", { clipPath: "inset(0 0% 0 0)", duration: X1 - X0, ease: "none" }, X0);   // 波形跟着声音一点点画出来
+          play("#e-fxh", 0, 1500, X0, X1);
+          pinAt("#e-x1", 210 + ((C.l47e + 0.5 - X0) / (X1 - X0)) * 1500, 1300, false);
+          hfNote(tl, "#e-x1", C.l47e + 0.6, 2.0);
+          pinAt("#e-x2", 210 + ((C.l48e + 0.4 - X0) / (X1 - X0)) * 1500, 1300, false);
+          hfNote(tl, "#e-x2", C.l48e + 0.5, 1.6);
+          // 只在换章节的时候出现一下：整支片子的章节，换章处的音效
+          const chap = document.getElementById("e-chap"), NS = "http://www.w3.org/2000/svg";
+          const mk = (tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); chap.appendChild(e); return e; };
+          mk("path", { class: "rail", d: "M0 40 H1560" });
+          ["actB", "actC", "actD", "actE", "actF", "actG", "actH", "actO"].forEach((a) => { const x = ACTS_START[a] / tot * 1560; mk("line", { class: "cut", x1: x, y1: 26, x2: x, y2: 54 }); });
+          SFX_T.forEach((t) => { const x = t / tot * 1560; mk("path", { class: "mk", d: "M" + (x - 3) + " 40 L" + x + " 6 L" + (x + 3) + " 40 L" + x + " 74 Z" }); });
+          [["开场", 0], ["选题", "actB"], ["口播", "actC"], ["分镜", "actD"], ["声音", "actE"], ["风格", "actF"], ["协作", "actG"], ["省额度", "actH"]].forEach(([n, a]) => { const t = mk("text", { class: "lb", x: (a ? ACTS_START[a] : 0) / tot * 1560 + 8, y: 20 }); t.textContent = n; });
+          tl.to("#e-fx", { opacity: 0.35, duration: 0.4 }, C.l49 - 0.2);
+          tl.fromTo("#e-chap", { opacity: 0 }, { opacity: 1, duration: 0.5 }, C.l50 - 0.3);
+
+          // ── ⑦ 整体音量：真的一起变小，再一起调大 ──
+          hfWhip(tl, cam, "#e-w", mbv, 960, 2700, 1, C.l51 - 0.5, "y");
+          tl.fromTo(["#e-c7", "#e-rd", "#e-mv", "#e-mm"], { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l51 - 0.2);
+          const R0 = C.l51, R1 = C.l54e + 1.0;   // e_ride = 混音里 C.l51 到 C.l54 结束后 1 秒
+          gsap.set("#e-rdw", { clipPath: "inset(0 100% 0 0)" });
+          tl.to("#e-rdw", { clipPath: "inset(0 0% 0 0)", duration: R1 - R0, ease: "none" }, R0);
+          play("#e-rdh", 0, 1180, R0, R1);
+          // 两根表：跟 config 的 rides 一样，「整体偏小」那句前 0.35 秒降 9 dB，「一起调大」后 0.1 秒起 1.2 秒升回来
+          const k = Math.pow(10, -9 / 20);
+          tl.to(["#e-mvi", "#e-mmi"], { scaleY: k, duration: 0.35, ease: "none" }, C.l52 - 0.35);
+          tl.to(["#e-mvi", "#e-mmi"], { scaleY: 1, duration: 1.2, ease: "none" }, C.l53 + 0.1);
+          tl.fromTo("#e-ratio", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l54 - 0.1);
+          tl.to("#e-in", { opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in" }, C.end - 0.6);
+
+          window.__timelines["actE"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

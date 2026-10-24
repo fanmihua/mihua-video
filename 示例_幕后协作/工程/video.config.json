@@ -1,0 +1,196 @@
+{
+ "title": "用 AI 做一支讲解视频",
+ "timing": "timing/film.json",
+ "tail": 2.7,
+ "sfx": "sfx.json",
+ "music": "assets/music/bed.wav",
+ "voiceFile": "assets/voice/voice.wav",
+ "mix": "assets/mix/final.wav",
+ "srt": "renders/subtitles.srt",
+ "loudness": -10,
+ "textReplace": {},
+ "forbid": [
+  "抖音",
+  "快手",
+  "视频号",
+  "淘宝",
+  "闲鱼",
+  "加微信",
+  "微信号",
+  "课程",
+  "课件"
+ ],
+ "fonts": {
+  "sh-700": "AlimamaShuHeiTi-Bold.otf",
+  "ph-400": "Alibaba-PuHuiTi-Regular.ttf",
+  "ph-500": "Alibaba-PuHuiTi-Medium.ttf",
+  "ph-700": "Alibaba-PuHuiTi-Bold.ttf"
+ },
+ "acts": [
+  {
+   "id": "actA",
+   "lead": 0
+  },
+  {
+   "id": "actB",
+   "lead": 0.5
+  },
+  {
+   "id": "actC",
+   "lead": 0.5
+  },
+  {
+   "id": "actD",
+   "lead": 0.5
+  },
+  {
+   "id": "actE",
+   "lead": 0.5
+  },
+  {
+   "id": "actF",
+   "lead": 0.5
+  },
+  {
+   "id": "actG",
+   "lead": 0.5
+  },
+  {
+   "id": "actH",
+   "lead": 0.5
+  },
+  {
+   "id": "actO",
+   "lead": 0.5
+  },
+  {
+   "id": "actP",
+   "lead": 0.5
+  }
+ ],
+ "aliases": {
+  "actA": {
+   "hello": "l1",
+   "shoot": "l11",
+   "topic": "l12",
+   "script": "l13",
+   "board": "l14",
+   "sound": "l15",
+   "style": "l16",
+   "crew": "l17",
+   "budget": "l18",
+   "quota": "l18",
+   "order": "l19",
+   "tour": "l20"
+  }
+ },
+ "chapters": [
+  {
+   "label": "选题",
+   "act": "actB",
+   "preview": [
+    "actA.topic",
+    "actA.tour"
+   ]
+  },
+  {
+   "label": "口播",
+   "act": "actC",
+   "preview": [
+    "actA.script"
+   ]
+  },
+  {
+   "label": "分镜",
+   "act": "actD",
+   "preview": [
+    "actA.board"
+   ]
+  },
+  {
+   "label": "声音",
+   "act": "actE",
+   "preview": [
+    "actA.sound"
+   ]
+  },
+  {
+   "label": "风格",
+   "act": "actF",
+   "preview": [
+    "actA.style"
+   ]
+  },
+  {
+   "label": "协作",
+   "act": "actG",
+   "preview": [
+    "actA.crew"
+   ]
+  },
+  {
+   "label": "省额度",
+   "act": "actH",
+   "preview": [
+    "actA.quota"
+   ]
+  }
+ ],
+ "navFrom": "actA.topic",
+ "navUntil": "actO.l1",
+ "sigAt": "actA.hello",
+ "noCaptions": [
+  "actP"
+ ],
+ "lifts": [
+  "actD.l54+1.0",
+  "actF.l75",
+  "actO.l7"
+ ],
+ "rides": [
+  {
+   "bus": "music",
+   "from": "actA.l1-3.9",
+   "to": "actP.end+5",
+   "db": -4,
+   "in": 0.05,
+   "out": 0.1,
+   "note": "配乐整片降 4 dB：人声更清楚，配乐只在底下垫着"
+  },
+  {
+   "bus": "music",
+   "from": "actE.l36e+0.4",
+   "to": "actE.l37-0.5",
+   "db": 9,
+   "in": 0.4,
+   "out": 0.4,
+   "note": "演示：以前那组一直转的配乐，单独放大（说话时不动）"
+  },
+  {
+   "bus": "music",
+   "from": "actE.l41e+0.4",
+   "to": "actE.l42-0.5",
+   "db": 10,
+   "in": 0.4,
+   "out": 0.4,
+   "note": "演示：现在的配乐，停下来钢琴接一句，单独放大"
+  },
+  {
+   "bus": "music",
+   "from": "actE.l44e+0.4",
+   "to": "actE.l45-0.5",
+   "db": 10,
+   "in": 0.4,
+   "out": 0.4,
+   "note": "演示：配乐多加一层（高光），单独放大"
+  },
+  {
+   "bus": "all",
+   "from": "actE.l52",
+   "to": "actE.l53+0.1",
+   "db": -9,
+   "in": 0.35,
+   "out": 1.2
+  }
+ ]
+}

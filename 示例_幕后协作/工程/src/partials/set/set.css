@@ -1,0 +1,21 @@
+/* 微观片场（各章共用的样式；每章的样式块里 INCLUDE 这个文件） */
+.mset { position: absolute; inset: 0; }
+.mset-light { position: absolute; left: 30px; top: 80px; width: 1860px; height: 950px; border-radius: 50%;
+  background: radial-gradient(closest-side, #dddddb 0%, #d9d9d7 52%, #cfcfcd 70%, rgba(198,198,196,0.6) 85%, rgba(170,170,168,0) 100%); }
+.mset-svg { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: visible; }
+.mset-svg .s { stroke: #161616; stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round; }
+.mset-svg .th { stroke-width: 2.4; }
+.mset-svg .n { fill: none; }
+.mset-svg .w { fill: #f7f7f5; }
+.mset-svg .l { fill: #c4c4c2; }
+.mset-svg .m { fill: #a2a2a0; }
+.mset-svg .k { fill: #161616; }
+.mset-svg .sh { fill: #c3c3c1; }
+.mset-svg .chalk { fill: none; stroke: #f2f2f0; stroke-width: 3; stroke-linecap: round; }
+.mset-svg .doodle { fill: none; stroke: #2a2a2a; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mset-svg .tape { font-family: "ShuHei", sans-serif; font-weight: 700; font-size: 19px; fill: #161616; letter-spacing: 0.04em; }
+.mset-svg .tape-n { font-family: "ShuHei", sans-serif; font-weight: 700; font-size: 19px; fill: #8a8a88; }
+.mset-svg .sign { font-family: "ShuHei", sans-serif; font-weight: 700; fill: #f7f7f5; }
+/* 近景时浅灰地面会铺到字幕下面：底部压暗一层，字幕白字才清楚 */
+.mset-capfade { position: absolute; left: 0; right: 0; bottom: 0; height: 240px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(17,17,18,0) 0%, rgba(17,17,18,0.5) 50%, rgba(17,17,18,0.8) 100%); }

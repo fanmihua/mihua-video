@@ -1,0 +1,19 @@
+{
+  "name": "example-muhou",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.8.150 preview",
+    "check": "npx --yes hyperframes@0.8.150 check",
+    "render": "npx --yes hyperframes@0.8.150 render",
+    "publish": "npx --yes hyperframes@0.8.150 publish",
+    "tts": "$HOME/.cache/mihua-video/venv/bin/python tools/tts_voice.py",
+    "tts:neutral": "$HOME/.cache/mihua-video/venv/bin/python tools/tts_voice.py --variant neutral",
+    "build": "node tools/build.mjs",
+    "build:neutral": "CONFIG=video.config.neutral.json node tools/build.mjs",
+    "mix": "python3 tools/mix.py video.config.json",
+    "mix:neutral": "python3 tools/mix.py video.config.neutral.json",
+    "cover": "node cover/render.mjs",
+    "cover:measure": "node cover/measure.mjs"
+  }
+}

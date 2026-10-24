@@ -1,0 +1,19 @@
+{
+ "_comment": "平台通用版（抖音 / 视频号 / B 站）：复制 video.config.json 的 acts/aliases/chapters 后改这几项",
+ "title": "（这支视频的名字）· 通用版",
+ "timing": "timing/film-neutral.json",
+ "acts": [],
+ "tail": 3.4,
+ "aliases": {},
+ "chapters": [],
+ "sigAt": "actA.l1",
+ "sfx": "sfx-neutral.json",
+ "music": "assets/music/bed-neutral.wav",
+ "voiceFile": "assets/voice/voice-neutral.wav",
+ "mix": "assets/mix/final-neutral.wav",
+ "srt": "renders/subtitles-neutral.srt",
+ "loudness": -10,
+ "textReplace": {},
+ "forbid": ["小红书", "红书", "抖音", "快手", "视频号", "B站", "哔哩哔哩", "淘宝", "闲鱼", "橱窗", "主页", "私信", "加微信", "微信号", "链接"],
+ "fonts": {"sh-700": "AlimamaShuHeiTi-Bold.otf", "ph-400": "Alibaba-PuHuiTi-Regular.ttf", "ph-500": "Alibaba-PuHuiTi-Medium.ttf", "ph-700": "Alibaba-PuHuiTi-Bold.ttf"}
+}

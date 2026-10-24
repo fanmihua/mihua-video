@@ -1,0 +1,6 @@
+{
+ "_comment": "换成你自己的 Fish Audio 声音：在 fish.audio 克隆声音后，把它的 id 填进 reference_id；API key 写在 ~/.config/mihua-video/keys.env（FISH_API_KEY=…），不要放进工程文件夹。",
+ "provider": "fish",
+ "model": "s2.1-pro",
+ "reference_id": "<你的 Fish Audio 声音 id>"
+}

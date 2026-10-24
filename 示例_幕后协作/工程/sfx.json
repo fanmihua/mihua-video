@@ -1,0 +1,47 @@
+[
+ {
+  "act": "actD",
+  "cue": "l1",
+  "offset": -0.55,
+  "file": "whoosh-short",
+  "dur": 0.6,
+  "vol": 0.07,
+  "note": "换章"
+ },
+ {
+  "act": "actE",
+  "cue": "l47e",
+  "offset": 0.3,
+  "file": "whoosh-short",
+  "dur": 0.6,
+  "vol": 9,
+  "note": "演示：第一支里比人声还大的转场音效。成片 -10 LUFS 有限幅，vol 要到 9 量出来才真的比人声大（300ms 最大 RMS：音效 -6.3 dB，人声 -8.2 dB）"
+ },
+ {
+  "act": "actE",
+  "cue": "l48e",
+  "offset": 0.2,
+  "file": "whoosh-short",
+  "dur": 0.6,
+  "vol": 0.13,
+  "note": "演示：改好以后"
+ },
+ {
+  "act": "actF",
+  "cue": "l1",
+  "offset": -0.55,
+  "file": "whoosh-short",
+  "dur": 0.6,
+  "vol": 0.07,
+  "note": "换章"
+ },
+ {
+  "act": "actH",
+  "cue": "l1",
+  "offset": -0.55,
+  "file": "whoosh-short",
+  "dur": 0.6,
+  "vol": 0.07,
+  "note": "换章"
+ }
+]

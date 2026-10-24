@@ -1,0 +1,39 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   AI 讲解视频 · 封面里固定不变的部分（只有这些）
+   尺寸、深灰舞台、左上签名 + 右上头像、字体。标题、素材、标注怎么排，每支视频按内容重新设计，
+   写在这支视频自己的 cover_34.html / cover_43.html 里——不要做成模板（references/cover.md）。
+   ───────────────────────────────────────────────────────────────────────────── */
+@font-face { font-family: "ShuHei"; font-weight: 700; src: url("../assets/fonts/AlimamaShuHeiTi-Bold.otf"); }
+@font-face { font-family: "PuHui"; font-weight: 400; src: url("../assets/fonts/Alibaba-PuHuiTi-Regular.ttf"); }
+@font-face { font-family: "PuHui"; font-weight: 500; src: url("../assets/fonts/Alibaba-PuHuiTi-Medium.ttf"); }
+@font-face { font-family: "PuHui"; font-weight: 700; src: url("../assets/fonts/Alibaba-PuHuiTi-Bold.ttf"); }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { position: relative; overflow: hidden; font-family: "PuHui", sans-serif; font-weight: 500; color: #f2f2f2; background: #111112; }
+body.r34 { width: 1242px; height: 1656px; }   /* 竖封面 3:4 */
+body.r43 { width: 1656px; height: 1242px; }   /* 横封面 4:3 */
+
+/* 舞台：和视频同一套深灰（径向渐变 + 顶部虚焦方块 + 暗角 + 颗粒） */
+.bg { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 60% at 55% 38%, #343437 0%, #1a1a1c 62%, #111112 100%); }
+.ghosts { position: absolute; left: -60px; top: 36px; display: flex; gap: 56px; filter: blur(26px); }
+.ghosts i { display: block; width: 180px; height: 180px; border-radius: 26px; background: rgba(255, 255, 255, 0.08); }
+.vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%); pointer-events: none; }
+.grain { position: absolute; inset: 0; opacity: 0.16; mix-blend-mode: overlay; pointer-events: none; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 260 260' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* 左上签名、右上头像 */
+.sig { position: absolute; left: 54px; top: 50px; height: 78px; filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55)); z-index: 5; }
+.ava { position: absolute; right: 56px; top: 46px; width: 86px; height: 86px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 4px #f1f1f0, 0 12px 28px rgba(0, 0, 0, 0.35); z-index: 5; }
+.ava img { width: 100%; height: 100%; object-fit: cover; }
+.r43 .sig { top: 46px; height: 74px; }
+.r43 .ava { top: 42px; width: 82px; height: 82px; }
+
+/* cover.js 画的箭头在这一层 */
+svg.ov { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; z-index: 4; pointer-events: none; }
+
+/* 白底版：body 加 light。
+   页面里的颜色写成 CSS 变量（字、卡片、线、高亮），light / 默认深灰各给一套；深灰版用同一个页面，只换 body 的 class 和 <meta name="out">。 */
+body.light { color: #111113; background: #f4f4f5; }
+body.light .bg { background: radial-gradient(ellipse 90% 60% at 60% 30%, #ffffff 0%, #f6f6f7 60%, #eeeef0 100%); }
+body.light .ghosts, body.light .vig { display: none; }
+body.light .grain { opacity: 0.06; }
+body.light .sig { filter: invert(1); }
+body.light .ava { box-shadow: 0 0 0 4px #ffffff, 0 12px 28px rgba(0, 0, 0, 0.16); }

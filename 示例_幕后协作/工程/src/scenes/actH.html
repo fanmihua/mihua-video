@@ -1,0 +1,203 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actH 07 省额度。章节卡：07 角落（硬币滑进存钱罐、小猪眨眼）。
+           ① 存钱罐旁边一台笔记本在渲染（帧数一直在跳，硬币不进罐子）；② 跟 AI 的对话：每一句、每看一张截图、读一段记录，都往罐子里投一枚——Claude Code 官方费用说明；
+              对话越长，后面每一句投得越多——官方原文「Token costs scale with context size」
+           ③ 分阶段开新对话：一段一段短对话，每段末尾一份交接文件（mihua-video 的交接模板真文件：做到哪 / 定了什么 / 下一步）
+           ④ 修改意见攒一批：一叠便签收进一张单子，一次说全。 */
+        #h-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #h-card, #h-setw, #h-in { position: absolute; inset: 0; }
+        #h-setw { transform-origin: 50% 50%; }
+        #h-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        .h-doc .bar b { font-size: 11px; } .h-doc .bar { height: 22px; } .h-doc .body { top: 22px; } .h-doc .bar i { width: 6px; height: 6px; }
+        #h-s-light { transform-origin: 0 0; }
+        #h-x { pointer-events: none; }
+        #h-x .lab { font: 700 13px ShuHei, sans-serif; fill: #161616; }
+        #h-x .num { font: 700 15px ShuHei, sans-serif; fill: #f7f7f5; }
+        .h-doc { position: absolute; opacity: 0; }
+        .h-doc .body { background: #fafaf9; }
+        .h-doc .src { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+        .h-doc .src img { display: block; width: 1280px; height: 800px; }
+        /* 分阶段（画布 x + 1920） */
+        #h-phases { position: absolute; left: 2040px; top: 260px; width: 1720px; height: 400px; overflow: visible; }
+        #h-hw { position: absolute; left: 2560px; top: 180px; width: 760px; height: 700px; }
+        #h-ho { position: absolute; left: 0; top: 0; width: 760px; opacity: 0; }
+        /* 攒一批（画布 x + 3840） */
+        #h-batch { position: absolute; left: 4060px; top: 220px; width: 1500px; height: 680px; overflow: visible; }
+      </style>
+      <div id="h-root" data-composition-id="actH" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <svg width="0" height="0" style="position:absolute"><filter id="h-mbh" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur id="h-mbhg" stdDeviation="0 0" /></filter><filter id="h-mbv" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="h-mbvg" stdDeviation="0 0" /></filter></svg>
+        <div id="h-card"><div id="h-setw"><div class="mset" id="h-set"><!--@@INCLUDE:src/partials/set/set_actH.html@@-->
+          <svg class="mset-svg" id="h-x" viewBox="0 0 1920 1080">
+            <!-- 一台笔记本：在我自己的电脑上渲染（片场坐标） -->
+            <g id="h-lap" transform="translate(1196 796)"><g filter="url(#h-s-wob)">
+              <ellipse cx="0" cy="3" rx="78" ry="9" class="sh" />
+              <path d="M-70 0 L70 0 L60 -14 L-60 -14 Z" class="s m" />
+              <rect x="-56" y="-104" width="112" height="90" rx="5" class="s" fill="#2a2a2a" />
+              <rect x="-48" y="-96" width="96" height="70" rx="2" fill="#3a3a3a" />
+            </g>
+              <text class="num" id="h-fr" x="0" y="-56" text-anchor="middle">0</text>
+              <rect x="-40" y="-44" width="80" height="5" rx="2" fill="#555" /><rect id="h-frb" x="-40" y="-44" width="80" height="5" rx="2" fill="#f7f7f5" />
+              <g transform="translate(0 30) rotate(2)"><g filter="url(#h-s-wob)"><rect x="-44" y="-11" width="88" height="22" rx="2" class="s th w" /></g><text class="lab" x="0" y="5" text-anchor="middle">我的电脑</text></g></g>
+            <!-- 对话：一个个气泡，每一个都往罐子里投一枚硬币 -->
+            <g id="h-bub">
+              <g class="h-b" transform="translate(1270 560)"><g filter="url(#h-s-wob)"><path class="s w th" d="M-38 -18 h76 q8 0 8 8 v18 q0 8 -8 8 h-50 l-10 9 v-9 h-16 q-8 0 -8 -8 v-18 q0 -8 8 -8 z" /></g><path class="doodle" d="M-26 -4 h52 M-26 6 h30" /></g>
+              <g class="h-b" transform="translate(1366 520)"><g filter="url(#h-s-wob)"><path class="s l th" d="M-38 -18 h76 q8 0 8 8 v18 q0 8 -8 8 h-16 v9 l-10 -9 h-50 q-8 0 -8 -8 v-18 q0 -8 8 -8 z" /></g><path class="doodle" d="M-26 -4 h52 M-26 6 h40" /></g>
+              <g class="h-b" transform="translate(1270 486)"><g filter="url(#h-s-wob)"><rect x="-30" y="-22" width="60" height="44" rx="3" class="s w th" /></g><path class="doodle" d="M-22 12 l12 -14 l8 8 l6 -6 l12 12" /><circle cx="14" cy="-10" r="4" class="doodle" /></g>
+              <g class="h-b" transform="translate(1366 446)"><g filter="url(#h-s-wob)"><rect x="-26" y="-30" width="52" height="60" rx="3" class="s w th" /></g><path class="doodle" d="M-16 -16 h32 M-16 -6 h32 M-16 4 h24 M-16 14 h28" /></g>
+            </g>
+            <g id="h-coins"></g>
+          </svg>
+          <div class="win h-doc" id="h-c1" style="left:1455px; top:440px; width:320px; height:42px"><div class="bar"><i></i><i></i><i></i><b>Claude Code 官方文档 · 费用</b></div><div class="body"><div class="f-crop" style="position:absolute; inset:0; overflow:hidden"><div class="src" style="transform: translate(-213px, -160px) scale(0.6)"><img src="assets/web/doc_cc_costs.png" alt="" /><div class="outline dark" style="left:571px; top:275px; width:156px; height:30px"></div></div></div></div></div>
+          <div class="win h-doc" id="h-c2" style="left:1455px; top:620px; width:320px; height:42px"><div class="bar"><i></i><i></i><i></i><b>Claude Code 官方文档 · 费用</b></div><div class="body"><div class="f-crop" style="position:absolute; inset:0; overflow:hidden"><div class="src" style="transform: translate(-213px, -183px) scale(0.6)"><img src="assets/web/doc_cc_context.png" alt="" /><div class="outline dark" style="left:357px; top:315px; width:274px; height:30px"></div></div></div></div></div>
+        </div></div><div class="mset-capfade"></div></div>
+
+        <div id="h-in"><div id="h-w">
+          <!-- 分阶段开新对话：一段段短对话，每段末尾一份交接文件 -->
+          <svg id="h-phases" viewBox="0 0 1720 400"></svg>
+          <div id="h-hw"><div class="code doc" id="h-ho"><div class="tab say"><span class="s">交接文件：新的对话读完就能接着做</span><b>mihua-video · 交接模板</b></div><!--@@INCLUDE:src/partials/handoff.html@@-->
+            <div class="hl" id="h-hh1" style="top:64px"></div><div class="hl" id="h-hh5" style="top:157px"></div><div class="hl" id="h-hh24" style="top:598.75px"></div></div></div>
+          <!-- 修改意见攒一批 -->
+          <svg id="h-batch" viewBox="0 0 1500 680"></svg>
+        </div></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/kit.js@@-->
+        <!--@@INCLUDE:src/partials/acts_dur.js@@-->
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          kPinTimeline(tl, C.end);
+          // 章节卡：07 省额度（硬币滑进投币口、小猪眨眼）
+          const scam = hfCam("#h-setw");
+          const S = hfCard("h-s-", tl, scam, 6, { prop: C.l1 - 0.3, hold: C.l2 });
+          const NS = "http://www.w3.org/2000/svg";
+          const mk = (parent, tag, at) => { const e = document.createElementNS(NS, tag); for (const k in at) e.setAttribute(k, at[k]); parent.appendChild(e); return e; };
+          gsap.set(["#h-lap", "#h-bub .h-b"], { opacity: 0 });
+
+          // ── ① 渲染是电脑自己在算：笔记本在跳帧数，硬币不动 ──
+          const R = C.l2 - 0.4;
+          tl.to(S.corners.filter((_, j) => j !== 6), { opacity: 0, duration: 0.6 }, R);
+          tl.to(["#h-s-route", "#h-s-beam", "#h-s-tapes"], { opacity: 0, duration: 0.5 }, R);
+          tl.to("#h-s-light", { scale: 0.42, x: 860, y: 450, duration: 1.0, ease: "power2.inOut" }, R);
+          scam.focus(tl, 1330, 650, 1.9, R, 1.0);
+          S.walk(1056, 800, 1.0, R, 0.9);
+          S.boil(C.l2, C.l9);
+          tl.set("#h-lap", { opacity: 1 }, C.l3 - 0.3);
+          S.drawEls([...document.querySelectorAll("#h-lap > g path, #h-lap > g rect, #h-lap > g ellipse, #h-lap g g rect")], C.l3 - 0.3, 0.5);
+          const total = Object.values(ACTS_DUR).reduce((a, b) => a + b, 0), N = Math.round(total * 30);
+          const fr = { v: 0 }, frEl = document.getElementById("h-fr"), frb = document.getElementById("h-frb");
+          const apFr = () => { frEl.textContent = Math.round(fr.v).toLocaleString("en-US") + " 帧"; frb.setAttribute("width", Math.max(0.5, 80 * fr.v / N)); }; apFr();
+          tl.to(fr, { v: N * 0.62, duration: C.l5 - C.l3, ease: "none", onUpdate: apFr }, C.l3);
+          S.pose(C.l4, "mh-point", [4, 0], "smile");   // 米花指着电脑：不花额度
+
+          // ── ② 真正花额度的是对话：每一句、每看一张截图、读一段记录，都投一枚 ──
+          const coins = document.getElementById("h-coins");
+          // 罐子的投币口在 07 角落里（局部坐标 (12,-113)，角落在 (1400,776)）
+          const slotX = 1412, slotY = 663;
+          const drop = (fromX, fromY, at, big) => {
+            const g = mk(coins, "g", {});
+            const r = big ? 13 : 10;
+            mk(g, "ellipse", { cx: 0, cy: 0, rx: r * 0.66, ry: r, fill: "#f7f7f5", stroke: "#161616", "stroke-width": 3 });
+            const o = { x: fromX, y: fromY, a: 0 }; const ap = () => { g.setAttribute("transform", "translate(" + o.x + " " + o.y + ")"); g.setAttribute("opacity", o.a); }; ap();
+            tl.to(o, { a: 1, duration: 0.15, onUpdate: ap }, at);
+            tl.to(o, { x: slotX, y: slotY - 20, duration: 0.55, ease: "power2.inOut", onUpdate: ap }, at + 0.1);
+            tl.to(o, { y: slotY + 12, a: 0, duration: 0.25, ease: "power2.in", onUpdate: ap }, at + 0.65);
+          };
+          const bubs = [...document.querySelectorAll("#h-bub .h-b")];
+          const BXY = [[1270, 560], [1366, 520], [1270, 486], [1366, 446]];
+          [C.l5 - 0.1, C.l5 + 0.9].forEach((t, i) => { tl.fromTo(bubs[i], { opacity: 0 }, { opacity: 1, duration: 0.3 }, t); drop(BXY[i][0], BXY[i][1], t + 0.3); });
+          [C.l6 + 0.2, C.l6 + 1.3].forEach((t, i) => { tl.fromTo(bubs[i + 2], { opacity: 0 }, { opacity: 1, duration: 0.3 }, t); drop(BXY[i + 2][0], BXY[i + 2][1], t + 0.3); });
+          hfArrive(tl, "#h-c1", C.l5 + 0.2, { z: -1000, rx: 8 });
+          // 对话越长，后面每说一句都更费：越往后投的越多
+          hfArrive(tl, "#h-c2", C.l8 - 0.2, { z: -1000, rx: 8 });
+          for (let i = 0; i < 6; i++) drop(1290 + (i % 2) * 80, 520 - i * 8, C.l8 + 0.2 + i * 0.32, i > 2);
+          S.pose(C.l8, "mh-down", [4, -3], "oh");
+
+          // ── ③ 分阶段开新对话 ──
+          const o3 = C.l9 - 0.5;
+          tl.to("#h-card", { y: -1300, duration: 0.6, ease: "power3.in" }, o3);
+          hfMotionBlur(tl, "#h-card", document.getElementById("h-mbvg"), "y", o3, 0.6, 40);
+          tl.set("#h-card", { opacity: 0 }, o3 + 0.62);
+          gsap.set("#h-in", { y: 900 });
+          tl.to("#h-in", { y: 0, duration: 0.75, ease: "power3.out" }, o3 + 0.35);
+          const cam = hfCam("#h-w");
+          cam.set(1, -1920, 0);
+          const ph = document.getElementById("h-phases");
+          const names = ["写稿", "配音", "做画面", "出样片"];
+          const groups = names.map((n, i) => {
+            const g = mk(ph, "g", { transform: "translate(" + (i * 430) + " 60)" });
+            mk(g, "rect", { x: 0, y: 0, width: 330, height: 120, rx: 14, fill: "#1b1b1d", stroke: "rgba(255,255,255,0.22)", "stroke-width": 1.5 });
+            for (let k = 0; k < 3; k++) mk(g, "rect", { x: 22 + (k % 2) * 60, y: 22 + k * 28, width: 170 - (k % 2) * 40, height: 18, rx: 9, fill: k % 2 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.34)" });
+            const t = mk(g, "text", { x: 0, y: -18, style: "font: 700 30px ShuHei, sans-serif; fill: #f2f2f4" }); t.textContent = n;
+            const doc = mk(g, "g", { transform: "translate(262 30)" });
+            mk(doc, "rect", { x: 0, y: 0, width: 50, height: 64, rx: 4, fill: "#f2f2ef", stroke: "#161616", "stroke-width": 2 });
+            mk(doc, "path", { d: "M10 16 h30 M10 28 h30 M10 40 h20", stroke: "#555", "stroke-width": 2.4, "stroke-linecap": "round" });
+            const dl = mk(g, "text", { x: 287, y: 122, "text-anchor": "middle", style: "font: 600 18px PuHui, sans-serif; fill: rgba(255,255,255,0.7)" }); dl.textContent = "交接";
+            if (i < names.length - 1) mk(g, "path", { d: "M316 62 C 360 62, 380 62, 418 62", stroke: "rgba(255,255,255,0.75)", "stroke-width": 2, fill: "none", "stroke-dasharray": "6 6" });
+            gsap.set(g, { opacity: 0 });
+            return g;
+          });
+          tl.to(groups[0], { opacity: 1, duration: 0.4 }, C.l10 - 0.1);
+          tl.to(groups[1], { opacity: 1, duration: 0.4 }, C.l10 + 0.6);
+          tl.to(groups[2], { opacity: 1, duration: 0.4 }, C.l11 - 0.1);
+          tl.to(groups[3], { opacity: 1, duration: 0.4 }, C.l11 + 0.6);
+          // 每一段做完，让 AI 写一份交接文件：交接模板真文件
+          tl.to("#h-phases", { y: 420, scale: 0.7, opacity: 0.4, duration: 0.7, ease: "power3.inOut" }, C.l13 - 0.4);
+          hfArrive(tl, "#h-ho", C.l13 - 0.2, { z: -1200, rx: 8 });
+          ["#h-hh1", "#h-hh5", "#h-hh24"].forEach((h, i) => tl.fromTo(h, { scaleX: 0 }, { scaleX: 1, duration: 0.4, ease: "power3.out" }, C.l14 + i * 0.75));
+          tl.to("#h-ho", { opacity: 0.3, duration: 0.4 }, C.l15 - 0.2);
+          tl.to("#h-phases", { y: 0, scale: 1, opacity: 1, duration: 0.7, ease: "power3.inOut" }, C.l15 - 0.2);
+
+          // ── ④ 修改意见攒一批 ──
+          hfWhip(tl, cam, "#h-w", document.getElementById("h-mbhg"), 4800, 540, 1, C.l16 - 0.45, "x");
+          const bt = document.getElementById("h-batch");
+          const notes = [];
+          for (let i = 0; i < 6; i++) {
+            const g = mk(bt, "g", {});
+            const x = 140 + (i % 3) * 190, y = 140 + Math.floor(i / 3) * 190, r = (i % 2 ? 4 : -5);
+            const inner = mk(g, "g", { transform: "translate(" + x + " " + y + ") rotate(" + r + ")" });
+            mk(inner, "rect", { x: -70, y: -60, width: 140, height: 120, rx: 4, fill: "#f2f2ef", stroke: "#161616", "stroke-width": 2.6 });
+            const t = mk(inner, "text", { x: -50, y: -22, style: "font: 700 26px ShuHei, sans-serif; fill: #161616" }); t.textContent = String(i + 1);
+            mk(inner, "path", { d: "M-50 4 h96 M-50 24 h70", stroke: "#555", "stroke-width": 3, "stroke-linecap": "round" });
+            gsap.set(g, { opacity: 0 }); notes.push({ g, inner, x, y });
+          }
+          notes.forEach((n, i) => tl.to(n.g, { opacity: 1, duration: 0.25 }, C.l16 + i * 0.22));
+          // 一张单子：一次说全
+          const sheet = mk(bt, "g", { transform: "translate(1040 260)" });
+          mk(sheet, "rect", { x: -180, y: -230, width: 360, height: 460, rx: 6, fill: "#f7f7f5", stroke: "#161616", "stroke-width": 3 });
+          const st = mk(sheet, "text", { x: -140, y: -170, style: "font: 700 30px ShuHei, sans-serif; fill: #161616" }); st.textContent = "这一版的意见";
+          for (let k = 0; k < 6; k++) { const l = mk(sheet, "text", { x: -140, y: -110 + k * 52, style: "font: 700 24px ShuHei, sans-serif; fill: #6a6a6a" }); l.textContent = (k + 1) + ".";
+            mk(sheet, "path", { d: "M-100 " + (-118 + k * 52) + " h220", stroke: "#888", "stroke-width": 3, "stroke-linecap": "round" }); }
+          gsap.set(sheet, { opacity: 0 });
+          tl.to(sheet, { opacity: 1, duration: 0.4 }, C.l17 - 0.3);
+          notes.forEach((n, i) => {
+            const o = { x: 0, y: 0, s: 1 }; const ap = () => n.g.setAttribute("transform", "translate(" + o.x + " " + o.y + ") scale(" + o.s + ")");
+            tl.to(o, { x: 1040 - n.x - 0 + (i - 2.5) * 6, y: 160 - n.y + i * 6, s: 0.35, duration: 0.6, ease: "power2.inOut", onUpdate: ap }, C.l17 + i * 0.12);
+            tl.to(n.g, { opacity: 0, duration: 0.25 }, C.l17 + i * 0.12 + 0.5);
+          });
+          // 不要改一处，看一次：一个小圈划掉
+          const loop = mk(bt, "g", { transform: "translate(300 560)" });
+          mk(loop, "path", { d: "M-60 0 a60 34 0 1 1 120 0 a60 34 0 1 1 -120 0", fill: "none", stroke: "rgba(255,255,255,0.7)", "stroke-width": 2.5, "stroke-dasharray": "7 7" });
+          const lt = mk(loop, "text", { x: 90, y: 10, style: "font: 700 26px ShuHei, sans-serif; fill: rgba(255,255,255,0.8)" }); lt.textContent = "改一处，看一次";
+          const lx = mk(loop, "path", { d: "M-70 -40 L300 40", stroke: "#f2f2f2", "stroke-width": 4, "stroke-linecap": "round" });
+          gsap.set(loop, { opacity: 0 }); gsap.set(lx, { opacity: 0 });
+          tl.to(loop, { opacity: 1, duration: 0.35 }, C.l18 - 0.1);
+          tl.to(lx, { opacity: 1, duration: 0.2 }, C.l18 + 0.9);
+          tl.to("#h-in", { opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in" }, C.end - 0.6);
+
+          window.__timelines["actH"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>

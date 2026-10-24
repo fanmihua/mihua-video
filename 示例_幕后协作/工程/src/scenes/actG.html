@@ -1,0 +1,241 @@
+<!doctype html>
+<html>
+  <head><meta charset="UTF-8" /></head>
+  <body>
+    <template>
+      <style>
+        /*@THEME@*/
+        <!--@@INCLUDE:src/partials/kit.css@@-->
+        <!--@@INCLUDE:src/partials/set/set.css@@-->
+        /* actG 06 协作。章节卡：06 角落（导演椅 + 摄影机，片盘转）。
+           分工（做法：概念画成片场小场景 + 真东西 + 细线串起来）：导演椅（人）往左、摄影机（AI）往右，中间摆一本 Skill 手册；
+           椅子上方三张小卡「观点 / 真实素材 / 判断」一直是人的；「风格要求」写进 Skill 交给 AI（细线走过手册到摄影机）；
+           「第一次做的新东西」（这期片场的静帧）又回到人手里（细线从摄影机绕回椅子）→ 一圈：分工不是固定的。
+           后半段同一个做法：三个问题各一张手绘小卡配一个例子；核对放三份真实材料（官方文档对照、配音转回文字、截图放大看）。 */
+        #g-root { position: absolute; inset: 0; color: var(--ink); font-family: "PuHui", sans-serif; }
+        #g-card, #g-setw { position: absolute; inset: 0; }
+        #g-setw { transform-origin: 50% 50%; }
+        #g-s-light { transform-origin: 1930px 305px; }
+        #g-x { pointer-events: none; }
+        #g-x .lk { fill: none; stroke: rgba(14,14,15,0.85); stroke-width: 3.0; stroke-linecap: round; stroke-linejoin: round; }
+        #g-x .lw { fill: none; stroke: #f4f4f4; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+        #g-x .lw.d { stroke-dasharray: 4 4; }
+        #g-x .ct { font-family: "ShuHei", sans-serif; font-weight: 700; font-size: 15px; fill: #161616; }
+        #g-x .cs { font-family: "PuHui", sans-serif; font-weight: 700; font-size: 8px; fill: #3a3a3a; }
+        #g-in { position: absolute; inset: 0; }
+        #g-w { position: absolute; inset: 0; transform-origin: 50% 50%; }
+        .g-q { position: absolute; overflow: visible; }
+        .g-qt { font: 700 34px ShuHei, sans-serif; fill: #161616; }
+        .g-qn { font: 700 22px PuHui, sans-serif; fill: #6a6a6a; }
+        #g-steps { position: absolute; left: 820px; top: 470px; display: flex; align-items: center; gap: 16px; }
+        #g-steps .chip { font-size: 30px; padding: 14px 20px; opacity: 0; }
+        #g-steps i { width: 44px; height: 2px; background: rgba(255,255,255,0.6); opacity: 0; }
+        #g-cut { position: absolute; height: 3px; background: #f2f2f2; box-shadow: 0 0 0 1.5px rgba(10,10,12,0.85); transform-origin: 0 50%; opacity: 0; }
+        .g-doc { position: absolute; width: 620px; height: 380px; opacity: 0; }
+        .g-doc .body { background: #fafaf9; }
+        .g-doc .src { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+        .g-doc .src img { display: block; width: 1280px; height: 800px; }
+        #g-lad { position: absolute; left: 4620px; top: 300px; width: 1000px; height: 560px; }
+        #g-lad .b { position: absolute; bottom: 70px; width: 160px; border-radius: 8px 8px 0 0; background: rgba(255,255,255,0.22); transform-origin: 50% 100%; }
+        #g-lad .b.on { background: #f2f2f2; }
+        #g-lad .lb { position: absolute; bottom: 20px; width: 160px; text-align: center; font: 700 30px/1 "ShuHei", sans-serif; color: #f2f2f4; }
+        #g-lad .cap { position: absolute; left: 0; top: 0; font: 600 22px/1 "PuHui", sans-serif; letter-spacing: 0.1em; color: rgba(255,255,255,0.55); white-space: nowrap; }
+        #g-of { position: absolute; left: 200px; top: 1250px; width: 1520px; opacity: 0; }
+        #g-tc { position: absolute; left: 200px; top: 1250px; width: 1520px; opacity: 0; }
+        #g-zf { left: 260px; top: 1220px; width: 1000px; height: 713px; opacity: 0; }
+        #g-zf .body img { object-fit: cover; }
+        #g-lens { position: absolute; left: 1080px; top: 1300px; width: 520px; height: 520px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 0 3px #f2f2f2, 0 0 0 6px rgba(10,10,12,0.85), 0 40px 90px rgba(0,0,0,0.6); opacity: 0; }
+        #g-lens img { position: absolute; width: 1600px; height: auto; left: -560px; top: -300px; }
+      </style>
+      <div id="g-root" data-composition-id="actG" data-width="1920" data-height="1080" data-duration="@@C.end@@">
+        <svg width="0" height="0" style="position:absolute"><filter id="g-mbh" x="-30%" y="-5%" width="160%" height="110%"><feGaussianBlur id="g-mbhg" stdDeviation="0 0" /></filter><filter id="g-mbv" x="-5%" y="-40%" width="110%" height="180%"><feGaussianBlur id="g-mbvg" stdDeviation="0 0" /></filter></svg>
+        <div id="g-card"><div id="g-setw"><div class="mset" id="g-set"><!--@@INCLUDE:src/partials/set/set_actG.html@@-->
+          <svg class="mset-svg" id="g-x" viewBox="0 0 1920 1080">
+            <defs><clipPath id="g-thc"><rect x="-44" y="-14" width="88" height="40" rx="2" /></clipPath><clipPath id="g-ths"><rect x="-46" y="-30" width="92" height="52" rx="2" /></clipPath></defs>
+            <!-- 中间：一本摊开的 Skill 手册（放在小桌上） -->
+            <g id="g-book" transform="translate(1462 520)"><g filter="url(#g-s-wob)">
+              <ellipse cx="0" cy="3" rx="72" ry="9" class="sh" />
+              <path d="M-40 -2 L-46 -40 M40 -2 L46 -40" class="s n" style="stroke-width:4" />
+              <rect x="-58" y="-48" width="116" height="10" rx="2" class="s m" />
+              <path d="M-2 -52 C-22 -62 -44 -62 -62 -56 L-58 -100 C-40 -106 -20 -106 -2 -96 Z" class="s w" />
+              <path d="M2 -52 C22 -62 44 -62 62 -56 L58 -100 C40 -106 20 -106 2 -96 Z" class="s w" />
+              <path d="M-50 -88 C-38 -92 -24 -92 -12 -86 M-50 -78 C-38 -82 -24 -82 -12 -76 M-50 -68 C-40 -71 -30 -71 -20 -67" class="doodle" />
+              <path d="M12 -86 C24 -92 38 -92 50 -88 M12 -76 C24 -82 38 -82 50 -78" class="doodle" />
+              <path d="M0 -96 L0 -52" class="s n th" />
+            </g></g>
+            <!-- 地上的胶带：人 / Skill / AI -->
+            <g id="g-tapes">
+              <g transform="translate(1146 556) rotate(-2)"><g filter="url(#g-s-wob)"><rect x="-26" y="-14" width="52" height="28" rx="2" class="s th w" /></g><text class="tape" x="0" y="7" text-anchor="middle">我</text></g>
+              <g transform="translate(1462 556) rotate(2)"><g filter="url(#g-s-wob)"><rect x="-38" y="-14" width="76" height="28" rx="2" class="s th w" /></g><text class="tape" x="0" y="7" text-anchor="middle">Skill</text></g>
+              <g transform="translate(1790 556) rotate(-2)"><g filter="url(#g-s-wob)"><rect x="-26" y="-14" width="52" height="28" rx="2" class="s th w" /></g><text class="tape" x="0" y="7" text-anchor="middle">AI</text></g>
+            </g>
+            <!-- 细线：人 → Skill → AI；AI → 人（新东西又回来） -->
+            <path class="lk" id="g-a1k" d="M1214 404 C 1290 452, 1372 456, 1420 420 M1504 420 C 1560 452, 1640 440, 1690 380" />
+            <path class="lw d" id="g-a1" d="M1214 404 C 1290 452, 1372 456, 1420 420 M1504 420 C 1560 452, 1640 440, 1690 380" />
+            <path class="lk" id="g-a1hk" d="M1690 380 l-1 12 M1690 380 l-11 4" /><path class="lw" id="g-a1h" d="M1690 380 l-1 12 M1690 380 l-11 4" />
+            <path class="lk" id="g-a2k" d="M1850 292 C 1820 150, 1120 140, 1022 238" />
+            <path class="lw d" id="g-a2" d="M1850 292 C 1820 150, 1120 140, 1022 238" />
+            <path class="lk" id="g-a2hk" d="M1022 238 l1 -12 M1022 238 l11 -4" /><path class="lw" id="g-a2h" d="M1022 238 l1 -12 M1022 238 l11 -4" />
+            <!-- 一直是人的：观点 / 真实素材 / 判断 -->
+            <g id="g-k1" transform="translate(1130 292) rotate(-4)"><g filter="url(#g-s-wob)"><rect x="-50" y="-34" width="100" height="70" rx="3" fill="#000" opacity="0.13" transform="translate(4 5)" /><rect x="-50" y="-34" width="100" height="70" rx="3" class="s w" /></g>
+              <text class="ct" x="0" y="-8" text-anchor="middle">观点</text><text class="cs" x="0" y="14" text-anchor="middle">我给了 AI 什么？</text></g>
+            <g id="g-k2" transform="translate(1236 284) rotate(3)"><g filter="url(#g-s-wob)"><rect x="-50" y="-34" width="100" height="70" rx="3" fill="#000" opacity="0.13" transform="translate(4 5)" /><rect x="-50" y="-34" width="100" height="70" rx="3" class="s w" /></g>
+              <text class="ct" x="0" y="-12" text-anchor="middle">真实的素材</text><image href="assets/img/fb1.png" x="-44" y="0" width="88" height="20" preserveAspectRatio="xMidYMid slice" /></g>
+            <g id="g-k3" transform="translate(1342 296) rotate(-2)"><g filter="url(#g-s-wob)"><rect x="-50" y="-34" width="100" height="70" rx="3" fill="#000" opacity="0.13" transform="translate(4 5)" /><rect x="-50" y="-34" width="100" height="70" rx="3" class="s w" />
+              <path class="s n" d="M-14 10 l8 9 l18 -20" style="stroke-width:3.4" /></g>
+              <text class="ct" x="0" y="-8" text-anchor="middle">判断</text></g>
+            <!-- 说过一次、写进 Skill 的：风格要求（从人这边经过手册走到摄影机） -->
+            <g id="g-k4p"><g id="g-k4" transform="translate(1752 236) rotate(4)"><g filter="url(#g-s-wob)"><rect x="-56" y="-34" width="112" height="70" rx="3" fill="#000" opacity="0.13" transform="translate(4 5)" /><rect x="-56" y="-34" width="112" height="70" rx="3" class="s w" /></g>
+              <text class="ct" x="0" y="-8" text-anchor="middle">风格要求</text><text class="cs" x="0" y="14" text-anchor="middle">深灰、颗粒、一屏一件事</text></g></g>
+            <!-- 第一次做的新东西：这期片场的静帧（又回到人手里） -->
+            <g id="g-k5p"><g id="g-k5" transform="translate(1018 292) rotate(-3)"><g filter="url(#g-s-wob)"><rect x="-56" y="-44" width="112" height="86" rx="3" fill="#000" opacity="0.13" transform="translate(4 5)" /><rect x="-56" y="-44" width="112" height="86" rx="3" class="s w" /></g>
+              <image href="assets/img/still_set.jpg" x="-48" y="-38" width="96" height="54" preserveAspectRatio="xMidYMid slice" />
+              <text class="ct" x="0" y="34" text-anchor="middle" style="font-size:12px">第一次做的新东西</text></g></g>
+          </svg>
+        </div></div><div class="mset-capfade"></div></div>
+
+        <div id="g-in"><div id="g-w">
+          <!-- 三个问题：每个问题一张手绘小卡，旁边是这个问题的例子 -->
+          <svg class="g-q" id="g-q1" viewBox="0 0 520 220" style="left:200px; top:400px; width:520px; height:220px"><g filter="url(#g-s-wob)"><rect x="8" y="10" width="500" height="196" rx="5" fill="#000" opacity="0.25" /><rect x="0" y="0" width="500" height="196" rx="5" class="g-pp" /><rect x="224" y="-12" width="52" height="18" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+            <text class="g-qn" x="40" y="64">第一</text><text class="g-qt" x="40" y="126">这个问题定过了吗</text></svg>
+          <div id="g-steps"><span class="chip">稿子</span><i></i><span class="chip">配音</span><i></i><span class="chip" id="g-still">静帧</span><i></i><span class="chip">样片</span><i></i><span class="chip">成片</span></div>
+          <div id="g-cut"></div>
+          <div class="note" id="g-cutn"><span class="dot"></span><span class="ln"></span><span class="t">风格定了<small>这一步省掉</small></span></div>
+
+          <svg class="g-q" id="g-q2" viewBox="0 0 520 220" style="left:2120px; top:400px; width:520px; height:220px"><g filter="url(#g-s-wob)"><rect x="8" y="10" width="500" height="196" rx="5" fill="#000" opacity="0.25" /><rect x="0" y="0" width="500" height="196" rx="5" class="g-pp" /><rect x="224" y="-12" width="52" height="18" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+            <text class="g-qn" x="40" y="64">第二</text><text class="g-qt" x="40" y="126">AI 能不能自己去查</text></svg>
+          <div class="win g-doc" id="g-d1" style="left:2760px; top:230px"><div class="bar"><i></i><i></i><i></i><b>官方文档</b></div><div class="body"><div class="f-crop" style="position:absolute; inset:0; overflow:hidden"><div class="src" style="transform: translate(-250px, -110px) scale(0.85)"><img src="assets/web/doc_cc_overview.png" alt="" /></div></div></div></div>
+          <div class="win g-doc" id="g-d2" style="left:2900px; top:330px"><div class="bar"><i></i><i></i><i></i><b>官方文档</b></div><div class="body"><div class="f-crop" style="position:absolute; inset:0; overflow:hidden"><div class="src" style="transform: translate(-280px, -40px) scale(0.85)"><img src="assets/web/doc_hf_intro.png" alt="" /></div></div></div></div>
+          <div class="win g-doc" id="g-d3" style="left:3040px; top:430px"><div class="bar"><i></i><i></i><i></i><b>官方文档</b></div><div class="body"><div class="f-crop" style="position:absolute; inset:0; overflow:hidden"><div class="src" style="transform: translate(-380px, -120px) scale(0.85)"><img src="assets/web/doc_fish_clone.png" alt="" /></div></div></div></div>
+          <div class="note" id="g-dn"><span class="dot"></span><span class="ln"></span><span class="t">AI 自己去读<small>官方文档的原文</small></span></div>
+
+          <svg class="g-q" id="g-q3" viewBox="0 0 520 220" style="left:4040px; top:400px; width:520px; height:220px"><g filter="url(#g-s-wob)"><rect x="8" y="10" width="500" height="196" rx="5" fill="#000" opacity="0.25" /><rect x="0" y="0" width="500" height="196" rx="5" class="g-pp" /><rect x="224" y="-12" width="52" height="18" fill="#e4e4e1" stroke="#161616" stroke-width="2.4" /></g>
+            <text class="g-qn" x="40" y="64">第三</text><text class="g-qt" x="40" y="126">只有我能判断的</text></svg>
+          <div id="g-lad"><span class="cap">越往后，改起来越费事</span>
+            <div class="b on" id="g-b1" style="left:0; height:80px"></div><div class="lb" style="left:0">稿子</div>
+            <div class="b" id="g-b2" style="left:250px; height:170px"></div><div class="lb" style="left:250px">配音</div>
+            <div class="b" id="g-b3" style="left:500px; height:280px"></div><div class="lb" style="left:500px">画面</div>
+            <div class="b" id="g-b4" style="left:750px; height:400px"></div><div class="lb" style="left:750px">成片</div></div>
+          <div class="note" id="g-ladn"><span class="dot"></span><span class="ln"></span><span class="t">先改稿子<small>看不看得懂、像不像我说话</small></span></div>
+
+          <!-- 核对：官方文档对照、配音转回文字、截图放大看 -->
+          <div class="code doc" id="g-of"><div class="tab say"><span class="s">技术说法：对着官方文档的原文查一遍</span><b>素材/交接.md</b></div><!--@@INCLUDE:src/partials/official.html@@--></div>
+          <div class="code" id="g-tc"><div class="tab say"><span class="s">配音转回文字，跟稿子对一遍</span><b>timing/tts_check.txt</b></div><!--@@INCLUDE:src/partials/ttscheck.html@@--></div>
+          <div class="win" id="g-zf"><div class="bar"><i></i><i></i><i></i><b>这一期的一帧 · 4K</b></div><div class="body"><img src="assets/img/zoom_crop.jpg" alt="" /></div></div>
+          <div id="g-lens"><img src="assets/img/zoom_crop.jpg" alt="" /></div>
+          <div class="note" id="g-zn"><span class="dot"></span><span class="ln"></span><span class="t">截出来，放大看一眼<small>线条、字、框对不对</small></span></div>
+        </div></div>
+      </div>
+      <script>
+        //@COMMON_JS@
+        <!--@@INCLUDE:src/partials/kit.js@@-->
+        <!--@@INCLUDE:src/partials/set/set.js@@-->
+        (function () {
+          const C = /*@CUES@*/;
+          const tl = gsap.timeline({ paused: true });
+          kPinTimeline(tl, C.end);
+          // 章节卡：06 协作（导演椅 + 摄影机，片盘转）
+          const scam = hfCam("#g-setw");
+          const S = hfCard("g-s-", tl, scam, 5, { prop: C.l1 - 0.3, hold: C.l3 });
+
+          // ── 分工：椅子往左、摄影机往右，中间摆上 Skill 手册 ──
+          const R = C.l3 - 0.55;
+          const mv = (id, dx) => { const el = document.getElementById(id), o = { v: 0 }; const ap = () => el.setAttribute("transform", "translate(" + o.v + " 0)"); ap(); tl.to(o, { v: dx, duration: 1.1, ease: "power2.inOut", onUpdate: ap }, R); };
+          mv("g-s-chair", -282); mv("g-s-chairsign", -282); mv("g-s-cam", 254);
+          tl.to(S.corners.filter((_, j) => j !== 5), { opacity: 0, duration: 0.6 }, R);
+          tl.to(["#g-s-route", "#g-s-beam", "#g-s-tapes"], { opacity: 0, duration: 0.5 }, R);
+          S.walk(1032, 548, 0.92, R + 0.1, 1.1); S.pose(R + 1.2, "mh-wave", [3, -2], "smile"); S.blink(R + 1.6);   // 米花站到导演椅旁边：人这一边
+          tl.to("#g-s-light", { scale: 0.5, duration: 1.1, ease: "power2.inOut" }, R);
+          scam.focus(tl, 1460, 372, 1.6, R, 1.1);
+          S.boil(C.l3, C.end);
+          gsap.set(["#g-book", "#g-tapes", "#g-k1", "#g-k2", "#g-k3", "#g-k4", "#g-k5"], { opacity: 0 });
+          tl.to("#g-tapes", { opacity: 1, duration: 0.5 }, R + 0.9);
+          // 一直是人的：观点、真实的素材、判断
+          [["#g-k1", C.l4 - 0.1], ["#g-k2", C.l4 + 0.75], ["#g-k3", C.l4 + 1.55]].forEach(([k, t]) => tl.fromTo(k, { opacity: 0 }, { opacity: 1, duration: 0.35 }, t));
+          // 说过一次、写进 Skill：风格要求从人这边走过手册，到摄影机
+          tl.fromTo("#g-book", { opacity: 0 }, { opacity: 1, duration: 0.4 }, C.l5 - 0.2);
+          const draw = (ids, t, d) => ids.forEach((id) => { const el = document.getElementById(id), L = el.getTotalLength();
+            gsap.set(el, { strokeDasharray: L + " " + L, strokeDashoffset: L, opacity: 0 }); tl.set(el, { opacity: 1 }, t);
+            tl.to(el, { strokeDashoffset: 0, duration: d, ease: "power2.inOut" }, t);
+            if (el.classList.contains("d")) tl.set(el, { strokeDasharray: "5 5", strokeDashoffset: 0 }, t + d + 0.02); });
+          const k4 = { x: -510, y: 56, r: -6 }, k4p = document.getElementById("g-k4p");
+          const ap4 = () => k4p.setAttribute("transform", "translate(" + k4.x + " " + k4.y + ") rotate(" + k4.r + " 1752 236)"); ap4();
+          tl.fromTo("#g-k4", { opacity: 0 }, { opacity: 1, duration: 0.35 }, C.l5 + 0.1);
+          draw(["g-a1k", "g-a1"], C.l6 - 0.1, 1.4); draw(["g-a1hk", "g-a1h"], C.l6 + 1.3, 0.2);
+          tl.to(k4, { x: -290, y: 160, r: 0, duration: 0.9, ease: "power2.inOut", onUpdate: ap4 }, C.l6 + 0.1);
+          tl.to(k4, { x: 0, y: 0, r: 0, duration: 0.9, ease: "power2.inOut", onUpdate: ap4 }, C.l6 + 1.0);
+          // 第一次做的新东西（这期片场的静帧）：先出现在摄影机那边，又绕回人手里
+          const k5 = { x: 836, y: -120 }, k5p = document.getElementById("g-k5p");
+          const ap5 = () => k5p.setAttribute("transform", "translate(" + k5.x + " " + k5.y + ")"); ap5();
+          tl.fromTo("#g-k5", { opacity: 0 }, { opacity: 1, duration: 0.35 }, C.l8 - 0.1);
+          draw(["g-a2k", "g-a2"], C.l9 - 0.2, 1.3); draw(["g-a2hk", "g-a2h"], C.l9 + 1.1, 0.2);
+          tl.to(k5, { x: 0, y: 0, duration: 1.4, ease: "power2.inOut", onUpdate: ap5 }, C.l9 - 0.1);
+          scam.breathe(tl, 1460, 372, 1.6, R + 1.2, C.l11 - 0.6, 0.03);
+
+          // ── 哪些步骤能省：三个问题 ──
+          document.querySelectorAll(".g-pp").forEach((r) => { r.setAttribute("fill", "#f7f7f5"); r.setAttribute("stroke", "#161616"); r.setAttribute("stroke-width", "3.4"); });
+          const o2 = C.l11 - 0.5;
+          tl.to("#g-card", { y: -1300, duration: 0.6, ease: "power3.in" }, o2);
+          hfMotionBlur(tl, "#g-card", document.getElementById("g-mbvg"), "y", o2, 0.6, 40);
+          tl.set("#g-card", { opacity: 0 }, o2 + 0.62);
+          gsap.set("#g-in", { y: 900 });
+          tl.to("#g-in", { y: 0, duration: 0.75, ease: "power3.out" }, o2 + 0.35);
+          const cam = hfCam("#g-w");
+          const drawQ = (q, t) => { gsap.set(q, { opacity: 0 }); tl.set(q, { opacity: 1 }, t); S.drawEls([...document.querySelectorAll(q + " > g rect")], t, 0.5); tl.fromTo(document.querySelectorAll(q + " text"), { opacity: 0 }, { opacity: 1, duration: 0.4 }, t + 0.35); };
+          // 第一：这个问题是不是已经定过了 → 风格定了，就不用每次先出静帧
+          drawQ("#g-q1", C.l12 + 0.2);
+          tl.to("#g-steps .chip, #g-steps i", { opacity: 1, duration: 0.35, stagger: 0.08 }, C.l13 + 0.4);
+          const st = document.getElementById("g-still"), cut = document.getElementById("g-cut");
+          const placeCut = () => { cut.style.left = (820 + st.offsetLeft - 8) + "px"; cut.style.top = (470 + st.offsetTop + st.offsetHeight / 2 - 1) + "px"; cut.style.width = (st.offsetWidth + 16) + "px"; };
+          kLive(tl, st, placeCut, C.end);
+          tl.fromTo(cut, { opacity: 1, scaleX: 0 }, { opacity: 1, scaleX: 1, duration: 0.4, ease: "power3.out", immediateRender: false }, C.l16 + 0.2);
+          tl.to("#g-still", { opacity: 0.35, duration: 0.3 }, C.l16 + 0.3);
+          pin("#g-cutn", "#g-steps", "b", { at: 0.55 }); hfNote(tl, "#g-cutn", C.l16 + 0.6, 1.8);
+          // 第二：AI 能不能自己去查 → 官方文档
+          hfWhip(tl, cam, "#g-w", document.getElementById("g-mbhg"), 2880, 540, 1, C.l17 - 0.45, "x");
+          drawQ("#g-q2", C.l17 - 0.2);
+          ["#g-d1", "#g-d2", "#g-d3"].forEach((d, i) => hfArrive(tl, d, C.l18 - 0.2 + i * 0.3, { z: -1200, rx: 8 }));
+          pin("#g-dn", "#g-d3", "b", { at: 0.3 }); hfNote(tl, "#g-dn", C.l18 + 0.8, 1.8);
+          // 第三：只有我能判断的 → 放在最早、改起来最省事的那一步
+          hfWhip(tl, cam, "#g-w", document.getElementById("g-mbhg"), 4800, 540, 1, C.l19 - 0.45, "x");
+          drawQ("#g-q3", C.l19 - 0.2);
+          gsap.set("#g-lad", { opacity: 0 }); tl.to("#g-lad", { opacity: 1, duration: 0.4 }, C.l21 - 0.3);
+          tl.fromTo("#g-lad .b", { scaleY: 0 }, { scaleY: 1, duration: 0.5, ease: "power3.out", stagger: 0.12 }, C.l21 - 0.2);
+          pin("#g-ladn", "#g-b1", "t", { at: 0.5 }); hfNote(tl, "#g-ladn", C.l22, 2.6);
+
+          // ── 核对 ──
+          // 官方文档对照表的「出处」一列是网址：糊掉（不露网址）。在这里按字找，重新生成面板也不会丢
+          (function blurUrls(root) {
+            const re = /(https?:\/\/\S+|[a-z0-9.-]+\.(com|dev|io|audio|ai)(\/[^\s|]*)?|costs#[^\s|]*|how-claude-code-works|best-practices)/gi;
+            const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), hits = []; let n;
+            const has = new RegExp(re.source, "i");
+            while ((n = w.nextNode())) if (has.test(n.nodeValue)) hits.push(n);
+            hits.forEach((t) => { const s = t.nodeValue, f = document.createDocumentFragment(); let last = 0, m; re.lastIndex = 0;
+              while ((m = re.exec(s))) { f.append(s.slice(last, m.index)); const sp = document.createElement("span"); sp.textContent = m[0]; sp.style.filter = "blur(4px)"; f.append(sp); last = m.index + m[0].length; }
+              f.append(s.slice(last)); t.replaceWith(f); });
+          })(document.querySelector("#g-of pre"));
+          // 「还有，AI 做出来的东西」时还停在上一个画面；「一定要核对」甩下来，第一份核对（官方文档对照）就进来
+          hfWhip(tl, cam, "#g-w", document.getElementById("g-mbvg"), 960, 1620, 1, C.l25 - 0.5, "y");
+          hfArrive(tl, "#g-of", C.l25 - 0.1, { z: -1200, rx: 8 });
+          // 这两块面板原样摆着只占画面上面一条、字小、下面空着。真实文件一个字不改，改镜头：
+          // 「讲到技术的地方」推近到表格左半边（1.8 倍，字约 27px，画面填满）；「对着官方文档再查一遍」时沿着亮的那几行往右走，看到官方原文和「一致」
+          cam.focus(tl, 693, 1380, 1.8, C.l26 - 0.2, 1.0);
+          hfFocus(tl, "#g-of", [3, 4, 6, 7], C.l27);
+          cam.focus(tl, 1227, 1380, 1.8, C.l27 + 0.25, 1.65);   // 在下一个推近（C.l28 - 0.45）之前走完，两段镜头不重叠
+          tl.to("#g-of", { opacity: 0, duration: 0.4 }, C.l28 - 0.4);
+          // 「配音合成以后，转回文字，跟稿子对一遍」：推到「稿子 / 听到」两行（件 / 建 那个字亮着）
+          cam.focus(tl, 640, 1330, 2.0, C.l28 - 0.45, 0.8);
+          hfArrive(tl, "#g-tc", C.l28 - 0.3, { z: -1200, rx: 8 });
+          tl.to("#g-tc", { opacity: 0, duration: 0.4 }, C.l29 - 0.4);
+          // 「画面也要截出来，放大看一眼」：拉回原位，截图窗口和放大镜进来
+          cam.focus(tl, 960, 1620, 1, C.l29 - 0.45, 0.8);
+          hfArrive(tl, "#g-zf", C.l29 - 0.3, { z: -1200, rx: 8 });
+          tl.fromTo("#g-lens", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.6, ease: "power3.out" }, C.l29 + 0.5);
+          pin("#g-zn", "#g-lens", "r", { at: 0.5 }); hfNote(tl, "#g-zn", C.l29 + 0.9);
+          tl.to("#g-in", { opacity: 0, filter: "blur(10px)", duration: 0.55, ease: "power2.in" }, C.end - 0.6);
+          window.__timelines["actG"] = tl;
+        })();
+      </script>
+    </template>
+  </body>
+</html>
